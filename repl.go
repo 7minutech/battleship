@@ -12,16 +12,12 @@ func getWords(input string) []string {
 	return words
 }
 
-func repl() {
+func repl(handler func([]string)) {
 	for {
 		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Print(">>> ")
 		scanner.Scan()
-		fmt.Println(scanner.Text())
 		words := getWords(scanner.Text())
-		for _, w := range words {
-			fmt.Println(w)
-		}
-		runCommand(words)
+		handler(words)
 	}
 }
