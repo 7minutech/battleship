@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -12,9 +14,14 @@ func getWords(input string) []string {
 
 func repl() {
 	for {
-		var input string
+		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Print(">>> ")
-		fmt.Scanln(&input)
-		runCommand(input)
+		scanner.Scan()
+		fmt.Println(scanner.Text())
+		words := getWords(scanner.Text())
+		for _, w := range words {
+			fmt.Println(w)
+		}
+		runCommand(words)
 	}
 }
