@@ -1,4 +1,4 @@
-package main
+package gamelogic
 
 import (
 	"fmt"
@@ -6,18 +6,18 @@ import (
 	"os"
 )
 
-func runCommand(cmds []string) {
+func gameCommand(cmds []string) {
 	switch cmds[0] {
 	case "help":
 		help()
 	case "quit":
 		quit()
-	case "move":
-		if len(cmds) != 2 {
-			fmt.Println("move: needs one additonal word for location (move: a1)")
+	case "place":
+		if len(cmds) != 4 {
+			fmt.Println("place: needs 4 args (place s1 a1 a3)")
 			return
 		}
-		log.Printf("moving to %s\n", cmds[1])
+		log.Printf("placeing ship: %s at start: %s end: %s\n", cmds[1], cmds[2], cmds[3])
 	default:
 		fmt.Printf("did not recognize command: %s\n", cmds[0])
 	}

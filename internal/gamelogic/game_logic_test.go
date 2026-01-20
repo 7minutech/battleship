@@ -1,4 +1,4 @@
-package main
+package gamelogic
 
 import "testing"
 
@@ -16,7 +16,7 @@ func TestGetWords(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual := getWords(c.input)
+		actual := GetWords(c.input)
 		if len(actual) != len(c.expected) {
 			t.Errorf("len(%s) = %d; not %d)", c.input, len(actual), len(c.expected))
 		}

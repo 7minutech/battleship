@@ -1,4 +1,4 @@
-package game
+package gamelogic
 
 const BOARD_SIZE = 10
 
