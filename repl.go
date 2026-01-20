@@ -2,7 +2,13 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
+
+func getWords(input string) []string {
+	words := strings.Split(input, " ")
+	return words
+}
 
 func repl() {
 	for {
