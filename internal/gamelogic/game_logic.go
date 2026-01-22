@@ -11,11 +11,6 @@ func GetWords(input string) []string {
 	return words
 }
 
-type boardMove struct {
-	row int
-	col int
-}
-
 func convertMove(mv string) (boardMove, error) {
 	if len(mv) != 2 {
 		return boardMove{}, fmt.Errorf("error: move was not exactly 2: %s", mv)
@@ -41,4 +36,133 @@ func convertMove(mv string) (boardMove, error) {
 	col := numInt - 1
 
 	return boardMove{row: row, col: col}, nil
+}
+
+func CreatePlayer(name string) Player {
+	player := Player{
+		userName:  name,
+		shipCount: STARTING_SHIP_COUNT,
+		ships:     createShips(),
+	}
+
+	return player
+}
+
+func createShips() []ship {
+	ships := []ship{
+		startCruiser,
+	}
+
+	return ships
+}
+
+func (gs *gameState) PlaceShip(words []string) error {
+	sp, err := gs.getShipPlacement(words)
+	if err != nil {
+		return err
+	}
+	if err := gs.validateShipPlacement(sp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gs *gameState) getShipPlacement(words []string) (shipPlacement, error) {
+	shipName := words[1]
+	startPlace := words[2]
+	endPlace := words[3]
+	ship, err := gs.getShip(shipName)
+
+	startPlaceMove, err := convertMove(startPlace)
+	if err != nil {
+		return shipPlacement{}, err
+	}
+
+	endPlaceMove, err := convertMove(endPlace)
+	if err != nil {
+		return shipPlacement{}, err
+	}
+
+	var shipOrientation orientation
+	if startPlaceMove.row == endPlaceMove.row {
+		shipOrientation = horizantal
+	} else if startPlaceMove.col == endPlaceMove.col {
+		shipOrientation = vertical
+	} else {
+		return shipPlacement{}, fmt.Errorf("error: ship start and end were not on same row or col")
+	}
+
+	shipPlacement := shipPlacement{start: startPlaceMove, end: endPlaceMove, ship: ship, orientation: shipOrientation}
+
+	return shipPlacement, err
+
+}
+
+func (gs *gameState) validateShipPlacement(sp shipPlacement) error {
+	var err error
+	err = validShipRange(sp)
+	err = gs.validateShipPlacement(sp)
+	return err
+}
+
+func (gs *gameState) getShip(shipName string) (ship, error) {
+	for _, ship := range gs.player.ships {
+		if ship.name == shipName {
+			return ship, nil
+		}
+	}
+	return ship{}, fmt.Errorf("error: could not find ship: %s", shipName)
+}
+
+func NewGameState(player Player) *gameState {
+	var gs gameState = gameState{player: player, turn: player1}
+	return &gs
+}
+
+func validShipRange(sp shipPlacement) error {
+	if sp.orientation == horizantal {
+		if sp.start.row > sp.end.row {
+			return fmt.Errorf("error: was placed left to right")
+		}
+		if Abs(sp.start.row-sp.end.row) != sp.ship.length {
+			return fmt.Errorf("error: ship does not fit between start and end")
+		}
+		return nil
+	} else {
+		if sp.start.col > sp.end.col {
+			return fmt.Errorf("error: was placed up and down")
+		}
+		if Abs(sp.start.col-sp.end.col) != sp.ship.length {
+			return fmt.Errorf("error: ship does not fit between start and end")
+		}
+		return nil
+	}
+}
+
+func (gs *gameState) shipsOccupyRange(sp shipPlacement) error {
+	if sp.orientation == horizantal {
+		for i := 0; i < sp.ship.length; i++ {
+			occupying := gs.gameBoard.sqaures[sp.start.row+i][sp.start.col]
+			if occupying != nil {
+				return fmt.Errorf("error: there are ships already between start and end")
+			}
+		}
+		return nil
+	} else {
+		for i := 0; i < sp.ship.length; i++ {
+			occupying := gs.gameBoard.sqaures[sp.start.row][sp.start.col+i]
+			if occupying != nil {
+				return fmt.Errorf("error: there are ships already between start and end")
+			}
+		}
+		return nil
+	}
+}
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
