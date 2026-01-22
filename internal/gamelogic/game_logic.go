@@ -33,11 +33,11 @@ func convertMove(mv string) (boardMove, error) {
 		return boardMove{}, fmt.Errorf("error: move did not contain a letter that was between a-z: %s", mv)
 	}
 
-	if 1 <= numInt && numInt <= 9 {
+	if !(1 <= numInt && numInt <= 9) {
 		return boardMove{}, fmt.Errorf("error: move did not contain a number that was between 1-9: %s", mv)
 	}
 
-	row := (int('a') - int(letter))
+	row := (int(letter) - int('a'))
 	col := numInt - 1
 
 	return boardMove{row: row, col: col}, nil
