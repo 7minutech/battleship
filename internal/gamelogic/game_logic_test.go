@@ -1,6 +1,8 @@
 package gamelogic
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGetWords(t *testing.T) {
 
@@ -27,4 +29,31 @@ func TestGetWords(t *testing.T) {
 		}
 	}
 
+}
+
+func TestConvertMove(t *testing.T) {
+	type expected struct {
+		move boardMove
+	}
+	cases := []struct {
+		input    string
+		expected boardMove
+	}{
+		{input: "a1", expected: boardMove{row: 0, col: 0}},
+		{input: "!2", expected: boardMove{}},
+		{input: "b10", expected: boardMove{}},
+		{input: "word", expected: boardMove{}},
+		{input: "c4", expected: boardMove{row: 2, col: 3}},
+		{input: "j8", expected: boardMove{row: 9, col: 7}},
+	}
+
+	for _, c := range cases {
+		mv, _ := convertMove(c.input)
+		if mv.row != c.expected.row {
+			t.Errorf("ConvertMove(%s): boardMove.row = %d; expected boardMove.row = %d", c.input, mv.row, c.expected.row)
+		}
+		if mv.col != c.expected.col {
+			t.Errorf("ConvertMove(%s): boardMove.col = %d; expected boardMove.col = %d", c.input, mv.col, c.expected.col)
+		}
+	}
 }
