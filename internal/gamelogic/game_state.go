@@ -28,6 +28,7 @@ type player struct {
 }
 
 type ship struct {
+	name     string
 	length   int
 	start    string
 	end      string
