@@ -1,6 +1,7 @@
 package gamelogic
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -54,6 +55,41 @@ func TestConvertMove(t *testing.T) {
 		}
 		if mv.col != c.expected.col {
 			t.Errorf("ConvertMove(%s): boardMove.col = %d; expected boardMove.col = %d", c.input, mv.col, c.expected.col)
+		}
+	}
+}
+
+func TestValidShipRange(t *testing.T) {
+	cases := []struct {
+		input    shipPlacement
+		expected error
+	}{
+		{input: shipPlacement{
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCruiser, orientation: horizantal},
+			expected: nil,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: startBattleship, orientation: vertical},
+			expected: nil,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 0, col: 3}, end: boardMove{row: 0, col: 1}, ship: startCruiser, orientation: horizantal},
+			expected: ErrInvalidOrientation,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 6, col: 4}, end: boardMove{row: 3, col: 4}, ship: startCruiser, orientation: vertical},
+			expected: ErrInvalidOrientation,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCarrier, orientation: horizantal},
+			expected: ErrInvalidShipSpace,
+		},
+	}
+
+	for _, c := range cases {
+		err := validShipRange(c.input)
+		if !(errors.Is(err, c.expected)) {
+			t.Errorf("actual: %v; expected: %v", err, c.expected)
 		}
 	}
 }
