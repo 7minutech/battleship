@@ -93,3 +93,42 @@ func TestValidShipRange(t *testing.T) {
 		}
 	}
 }
+
+func TestShipsOccupyRange(t *testing.T) {
+	gs := NewGameState(Player{})
+
+	var testShip ship = startCruiser
+	// ship from a1 - a3
+	gs.gameBoard.sqaures[0][0] = &testShip
+	gs.gameBoard.sqaures[0][1] = &testShip
+	gs.gameBoard.sqaures[0][2] = &testShip
+
+	cases := []struct {
+		input    shipPlacement
+		expected error
+	}{
+		{input: shipPlacement{
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCruiser, orientation: horizantal},
+			expected: ErrInvalidOccupiedSqaure,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: startBattleship, orientation: vertical},
+			expected: nil,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 2, col: 1}, ship: startCruiser, orientation: vertical},
+			expected: ErrInvalidOccupiedSqaure,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 1, col: 1}, end: boardMove{row: 1, col: 3}, ship: startCarrier, orientation: horizantal},
+			expected: nil,
+		},
+	}
+
+	for _, c := range cases {
+		err := gs.shipsOccupyRange(c.input)
+		if !(errors.Is(err, c.expected)) {
+			t.Errorf("actual: %v; expected: %v", err, c.expected)
+		}
+	}
+}
