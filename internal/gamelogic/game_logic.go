@@ -103,7 +103,7 @@ func (gs *gameState) getShipPlacement(words []string) (shipPlacement, error) {
 func (gs *gameState) validateShipPlacement(sp shipPlacement) error {
 	var err error
 	err = validShipRange(sp)
-	err = gs.validateShipPlacement(sp)
+	err = gs.shipsOccupyRange(sp)
 	return err
 }
 
@@ -145,12 +145,14 @@ func validShipRange(sp shipPlacement) error {
 	}
 }
 
+var ErrInvalidOccupiedSqaure = fmt.Errorf("error: there are ships already between start and end")
+
 func (gs *gameState) shipsOccupyRange(sp shipPlacement) error {
 	if sp.orientation == horizantal {
 		for i := 0; i < sp.ship.length; i++ {
 			occupying := gs.gameBoard.sqaures[sp.start.row+i][sp.start.col]
 			if occupying != nil {
-				return fmt.Errorf("error: there are ships already between start and end")
+				return ErrInvalidOccupiedSqaure
 			}
 		}
 		return nil
@@ -158,7 +160,7 @@ func (gs *gameState) shipsOccupyRange(sp shipPlacement) error {
 		for i := 0; i < sp.ship.length; i++ {
 			occupying := gs.gameBoard.sqaures[sp.start.row][sp.start.col+i]
 			if occupying != nil {
-				return fmt.Errorf("error: there are ships already between start and end")
+				return ErrInvalidOccupiedSqaure
 			}
 		}
 		return nil
