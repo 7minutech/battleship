@@ -4,13 +4,58 @@ const BOARD_SIZE = 10
 
 const STARTING_SHIP_COUNT = 5
 
+const CRUISER_LENGTH, SUBMARINE_LENGTH = 3, 3
+const BATTLESHIP_LENGTH = 4
+const CARRIER_LENGTH = 5
+const DESTROYER_LENGTH = 2
+
 var startCruiser = ship{
 	name:    "cruiser",
-	length:  3,
+	length:  CRUISER_LENGTH,
 	start:   boardMove{},
 	end:     boardMove{},
 	modules: map[boardMove]bool{},
-	hp:      3,
+	hp:      CRUISER_LENGTH,
+	alive:   true,
+}
+
+var startBattleship = ship{
+	name:    "battleship",
+	length:  BATTLESHIP_LENGTH,
+	start:   boardMove{},
+	end:     boardMove{},
+	modules: map[boardMove]bool{},
+	hp:      BATTLESHIP_LENGTH,
+	alive:   true,
+}
+
+var startCarrier = ship{
+	name:    "carrier",
+	length:  CARRIER_LENGTH,
+	start:   boardMove{},
+	end:     boardMove{},
+	modules: map[boardMove]bool{},
+	hp:      CARRIER_LENGTH,
+	alive:   true,
+}
+
+var startSubmarine = ship{
+	name:    "submarine",
+	length:  SUBMARINE_LENGTH,
+	start:   boardMove{},
+	end:     boardMove{},
+	modules: map[boardMove]bool{},
+	hp:      SUBMARINE_LENGTH,
+	alive:   true,
+}
+
+var startDestroyer = ship{
+	name:    "destroyer",
+	length:  DESTROYER_LENGTH,
+	start:   boardMove{},
+	end:     boardMove{},
+	modules: map[boardMove]bool{},
+	hp:      DESTROYER_LENGTH,
 	alive:   true,
 }
 
