@@ -1,6 +1,7 @@
 package gamelogic
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -120,21 +121,25 @@ func NewGameState(player Player) *gameState {
 	return &gs
 }
 
+var ErrInvalidOrientation = errors.New("error: not placed left to right or up and down")
+var ErrInvalidShipSpace = errors.New("error: ship does not fit between start and end")
+
 func validShipRange(sp shipPlacement) error {
+
 	if sp.orientation == horizantal {
-		if sp.start.row > sp.end.row {
-			return fmt.Errorf("error: was placed left to right")
+		if sp.start.col > sp.end.col {
+			return ErrInvalidOrientation
 		}
-		if Abs(sp.start.row-sp.end.row) != sp.ship.length {
-			return fmt.Errorf("error: ship does not fit between start and end")
+		if Abs(sp.start.col-sp.end.col)+1 != sp.ship.length {
+			return ErrInvalidShipSpace
 		}
 		return nil
 	} else {
-		if sp.start.col > sp.end.col {
-			return fmt.Errorf("error: was placed up and down")
+		if sp.start.row > sp.end.row {
+			return ErrInvalidOrientation
 		}
-		if Abs(sp.start.col-sp.end.col) != sp.ship.length {
-			return fmt.Errorf("error: ship does not fit between start and end")
+		if Abs(sp.start.row-sp.end.row)+1 != sp.ship.length {
+			return ErrInvalidShipSpace
 		}
 		return nil
 	}
