@@ -3,8 +3,11 @@ package gamelogic
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 func GetWords(input string) []string {
@@ -66,6 +69,20 @@ func (gs *gameState) PlaceShip(words []string) error {
 		return err
 	}
 
+	if sp.orientation == horizantal {
+		for i := range sp.ship.length {
+			row := sp.start.row
+			col := sp.start.col + i
+			gs.gameBoard.sqaures[row][col] = &sp.ship
+		}
+	} else {
+		for i := range sp.ship.length {
+			row := sp.start.row + i
+			col := sp.start.col
+			gs.gameBoard.sqaures[row][col] = &sp.ship
+		}
+	}
+
 	return nil
 }
 
@@ -114,6 +131,32 @@ func (gs *gameState) getShip(shipName string) (ship, error) {
 		}
 	}
 	return ship{}, fmt.Errorf("error: could not find ship: %s", shipName)
+}
+
+func (gs *gameState) Show() {
+	defer fmt.Println()
+	var data [][]string
+	header := []string{" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
+	data = append(data, header)
+	for row := range BOARD_SIZE {
+		rowLabelVal := A_VAL + row
+		rowLabel := string(rune(rowLabelVal))
+		rowData := []string{rowLabel}
+		for col := range BOARD_SIZE {
+			ship := gs.gameBoard.sqaures[row][col]
+			if ship == nil {
+				rowData = append(rowData, " ")
+			} else {
+				rowData = append(rowData, "s")
+			}
+		}
+		data = append(data, rowData)
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header(data[0])
+	table.Bulk(data[1:])
+	table.Render()
+
 }
 
 func NewGameState(player Player) *gameState {

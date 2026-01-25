@@ -8,6 +8,7 @@ const CRUISER_LENGTH, SUBMARINE_LENGTH = 3, 3
 const BATTLESHIP_LENGTH = 4
 const CARRIER_LENGTH = 5
 const DESTROYER_LENGTH = 2
+const A_VAL = 97
 
 var startCruiser = ship{
 	name:    "cruiser",
