@@ -22,7 +22,6 @@ func main() {
 		fmt.Print(">>> ")
 		scanner.Scan()
 		words := gamelogic.GetWords(scanner.Text())
-		fmt.Print(words)
 		switch words[0] {
 		case "help":
 			gamelogic.Help()
@@ -37,6 +36,8 @@ func main() {
 				continue
 			}
 			log.Printf("placed ship: %s from %s to %s", words[1], words[2], words[3])
+		case "show":
+			gameState.Show()
 		case "quit":
 			gamelogic.Quit()
 		default:
