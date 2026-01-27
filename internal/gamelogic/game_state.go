@@ -9,6 +9,10 @@ const BATTLESHIP_LENGTH = 4
 const CARRIER_LENGTH = 5
 const DESTROYER_LENGTH = 2
 const A_VAL = 97
+const SHIP_CHAR = "●"
+const OPTIONAL_SQUARE = "○"
+const HIT_CHAR = "✖"
+const MISS_CHAR = "~"
 
 var startCruiser = ship{
 	name:    "cruiser",
