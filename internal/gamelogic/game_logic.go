@@ -16,12 +16,12 @@ func GetWords(input string) []string {
 }
 
 func convertMove(mv string) (boardMove, error) {
-	if len(mv) != 2 {
-		return boardMove{}, fmt.Errorf("error: move was not exactly 2: %s", mv)
+	if len(mv) > 3 {
+		return boardMove{}, fmt.Errorf("error: move is too long: %s", mv)
 	}
 
 	letter := mv[0]
-	num := string(mv[1])
+	num := string(mv[1:])
 
 	numInt, err := strconv.Atoi(num)
 	if err != nil {
@@ -32,8 +32,8 @@ func convertMove(mv string) (boardMove, error) {
 		return boardMove{}, fmt.Errorf("error: move did not contain a letter that was between a-z: %s", mv)
 	}
 
-	if !(1 <= numInt && numInt <= 9) {
-		return boardMove{}, fmt.Errorf("error: move did not contain a number that was between 1-9: %s", mv)
+	if !(1 <= numInt && numInt <= 10) {
+		return boardMove{}, fmt.Errorf("error: move did not contain a number that was between 1-10: %s", mv)
 	}
 
 	row := (int(letter) - int('a'))
@@ -208,7 +208,7 @@ var ErrInvalidOccupiedSqaure = fmt.Errorf("error: there are ships already betwee
 func (gs *gameState) shipsOccupyRange(sp shipPlacement) error {
 	if sp.orientation == horizantal {
 		for i := 0; i < sp.ship.length; i++ {
-			occupying := gs.gameBoard.sqaures[sp.start.row+i][sp.start.col]
+			occupying := gs.gameBoard.sqaures[sp.start.row][sp.start.col+i]
 			if occupying != nil {
 				return ErrInvalidOccupiedSqaure
 			}
@@ -216,7 +216,7 @@ func (gs *gameState) shipsOccupyRange(sp shipPlacement) error {
 		return nil
 	} else {
 		for i := 0; i < sp.ship.length; i++ {
-			occupying := gs.gameBoard.sqaures[sp.start.row][sp.start.col+i]
+			occupying := gs.gameBoard.sqaures[sp.start.row+i][sp.start.col]
 			if occupying != nil {
 				return ErrInvalidOccupiedSqaure
 			}
