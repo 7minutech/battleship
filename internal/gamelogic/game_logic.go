@@ -91,6 +91,9 @@ func (gs *gameState) getShipPlacement(words []string) (shipPlacement, error) {
 	startPlace := words[2]
 	endPlace := words[3]
 	ship, err := gs.getShip(shipName)
+	if err != nil {
+		return shipPlacement{}, err
+	}
 
 	startPlaceMove, err := convertMove(startPlace)
 	if err != nil {
