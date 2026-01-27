@@ -152,9 +152,9 @@ func (gs *gameState) Show() {
 		for col := range BOARD_SIZE {
 			ship := gs.gameBoard.sqaures[row][col]
 			if ship == nil {
-				rowData = append(rowData, " ")
+				rowData = append(rowData, OPTIONAL_SQUARE)
 			} else {
-				rowData = append(rowData, "s")
+				rowData = append(rowData, ship.icon)
 			}
 		}
 		data = append(data, rowData)

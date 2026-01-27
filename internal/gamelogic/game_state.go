@@ -1,5 +1,7 @@
 package gamelogic
 
+import "github.com/fatih/color"
+
 const BOARD_SIZE = 10
 
 const STARTING_SHIP_COUNT = 5
@@ -22,6 +24,7 @@ var startCruiser = ship{
 	modules: map[boardMove]bool{},
 	hp:      CRUISER_LENGTH,
 	alive:   true,
+	icon:    color.GreenString(SHIP_CHAR),
 }
 
 var startBattleship = ship{
@@ -32,6 +35,7 @@ var startBattleship = ship{
 	modules: map[boardMove]bool{},
 	hp:      BATTLESHIP_LENGTH,
 	alive:   true,
+	icon:    color.BlueString(SHIP_CHAR),
 }
 
 var startCarrier = ship{
@@ -42,6 +46,7 @@ var startCarrier = ship{
 	modules: map[boardMove]bool{},
 	hp:      CARRIER_LENGTH,
 	alive:   true,
+	icon:    color.RedString(SHIP_CHAR),
 }
 
 var startSubmarine = ship{
@@ -52,6 +57,7 @@ var startSubmarine = ship{
 	modules: map[boardMove]bool{},
 	hp:      SUBMARINE_LENGTH,
 	alive:   true,
+	icon:    color.CyanString(SHIP_CHAR),
 }
 
 var startDestroyer = ship{
@@ -62,6 +68,7 @@ var startDestroyer = ship{
 	modules: map[boardMove]bool{},
 	hp:      DESTROYER_LENGTH,
 	alive:   true,
+	icon:    color.HiMagentaString(SHIP_CHAR),
 }
 
 type PlayerTurn int
@@ -102,6 +109,7 @@ type ship struct {
 	modules map[boardMove]bool // a1[false], a2[false], a3[false], a4[true]
 	hp      int
 	alive   bool
+	icon    string
 }
 
 type boardMove struct {
