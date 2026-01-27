@@ -54,7 +54,11 @@ func CreatePlayer(name string) Player {
 
 func createShips() []ship {
 	ships := []ship{
+		startCarrier,
+		startBattleship,
 		startCruiser,
+		startDestroyer,
+		startSubmarine,
 	}
 
 	return ships
