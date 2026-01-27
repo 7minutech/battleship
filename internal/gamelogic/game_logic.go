@@ -72,23 +72,17 @@ func (gs *gameState) PlaceShip(words []string) error {
 	if err := gs.validateShipPlacement(sp); err != nil {
 		return err
 	}
-
-	if sp.orientation == horizantal {
-		for i := range sp.ship.length {
-			row := sp.start.row
-			col := sp.start.col + i
-			bm := boardMove{row: row, col: col}
-			gs.gameBoard.sqaures[row][col] = &sp.ship
-			sp.ship.modules[bm] = false
+	for i := range sp.ship.length {
+		row := sp.start.row
+		col := sp.start.col
+		if sp.orientation == horizantal {
+			col = sp.start.col + i
+		} else {
+			row = sp.start.row + i
 		}
-	} else {
-		for i := range sp.ship.length {
-			row := sp.start.row + i
-			col := sp.start.col
-			bm := boardMove{row: row, col: col}
-			gs.gameBoard.sqaures[row][col] = &sp.ship
-			sp.ship.modules[bm] = false
-		}
+		bm := boardMove{row: row, col: col}
+		gs.gameBoard.sqaures[row][col] = &sp.ship
+		sp.ship.modules[bm] = false
 	}
 
 	return nil
