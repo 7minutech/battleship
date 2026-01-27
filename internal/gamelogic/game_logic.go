@@ -170,6 +170,31 @@ func (gs *gameState) Show() {
 
 }
 
+func (gs *gameState) ShowOpponentBoard() {
+	defer fmt.Println()
+	var data [][]string
+	header := []string{" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
+	data = append(data, header)
+	for row := range BOARD_SIZE {
+		rowLabelVal := A_VAL + row
+		rowLabel := string(rune(rowLabelVal))
+		rowData := []string{rowLabel}
+		for col := range BOARD_SIZE {
+			square := gs.opponentBoaord.sqaures[row][col]
+			if square == "" {
+				square = OPTIONAL_SQUARE
+			}
+			rowData = append(rowData, square)
+		}
+		data = append(data, rowData)
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header(data[0])
+	table.Bulk(data[1:])
+	table.Render()
+
+}
+
 func NewGameState(player Player) *gameState {
 	var gs gameState = gameState{player: player, turn: player1}
 	return &gs

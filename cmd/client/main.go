@@ -40,6 +40,8 @@ func main() {
 			gameState.Show()
 		case "show":
 			gameState.Show()
+		case "look":
+			gameState.ShowOpponentBoard()
 		case "quit":
 			gamelogic.Quit()
 		default:

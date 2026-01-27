@@ -90,13 +90,18 @@ const (
 )
 
 type gameState struct {
-	player    Player
-	turn      PlayerTurn
-	gameBoard board
+	player         Player
+	turn           PlayerTurn
+	gameBoard      board
+	opponentBoaord displayBoard
 }
 
 type board struct {
 	sqaures [BOARD_SIZE][BOARD_SIZE]*ship
+}
+
+type displayBoard struct {
+	sqaures [BOARD_SIZE][BOARD_SIZE]string
 }
 
 type Player struct {
