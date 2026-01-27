@@ -77,13 +77,17 @@ func (gs *gameState) PlaceShip(words []string) error {
 		for i := range sp.ship.length {
 			row := sp.start.row
 			col := sp.start.col + i
+			bm := boardMove{row: row, col: col}
 			gs.gameBoard.sqaures[row][col] = &sp.ship
+			sp.ship.modules[bm] = false
 		}
 	} else {
 		for i := range sp.ship.length {
 			row := sp.start.row + i
 			col := sp.start.col
+			bm := boardMove{row: row, col: col}
 			gs.gameBoard.sqaures[row][col] = &sp.ship
+			sp.ship.modules[bm] = false
 		}
 	}
 
