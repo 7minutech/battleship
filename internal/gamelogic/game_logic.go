@@ -133,13 +133,15 @@ func (gs *gameState) validateShipPlacement(sp shipPlacement) error {
 	return err
 }
 
+var ErrShipNotFound = errors.New("error: could not find ship with that name")
+
 func (gs *gameState) getShip(shipName string) (ship, error) {
 	for _, ship := range gs.player.ships {
 		if ship.name == shipName {
 			return ship, nil
 		}
 	}
-	return ship{}, fmt.Errorf("error: could not find ship: %s", shipName)
+	return ship{}, ErrShipNotFound
 }
 
 func (gs *gameState) Show() {

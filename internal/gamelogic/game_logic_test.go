@@ -136,3 +136,27 @@ func TestShipsOccupyRange(t *testing.T) {
 		}
 	}
 }
+
+func TestGetShip(t *testing.T) {
+	player := CreatePlayer("tester")
+	gs := NewGameState(player)
+
+	cases := []struct {
+		input    string
+		expected error
+	}{
+		{input: "cruiser", expected: nil},
+		{input: "battleship", expected: nil},
+		{input: "destroyer", expected: nil},
+		{input: "submarine", expected: nil},
+		{input: "carrier", expected: nil},
+		{input: "frigate", expected: ErrShipNotFound},
+	}
+
+	for _, c := range cases {
+		_, err := gs.getShip(c.input)
+		if !(errors.Is(err, c.expected)) {
+			t.Errorf("GetShip(%s): actual: %v; expected: %v", c.input, err, c.expected)
+		}
+	}
+}
