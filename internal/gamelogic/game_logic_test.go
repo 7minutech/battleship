@@ -42,7 +42,7 @@ func TestConvertMove(t *testing.T) {
 	}{
 		{input: "a1", expected: boardMove{row: 0, col: 0}},
 		{input: "!2", expected: boardMove{}},
-		{input: "b10", expected: boardMove{}},
+		{input: "b10", expected: boardMove{row: 1, col: 9}},
 		{input: "word", expected: boardMove{}},
 		{input: "c4", expected: boardMove{row: 2, col: 3}},
 		{input: "j8", expected: boardMove{row: 9, col: 7}},
@@ -121,6 +121,10 @@ func TestShipsOccupyRange(t *testing.T) {
 		},
 		{input: shipPlacement{
 			start: boardMove{row: 1, col: 1}, end: boardMove{row: 1, col: 3}, ship: startCarrier, orientation: horizantal},
+			expected: nil,
+		},
+		{input: shipPlacement{
+			start: boardMove{row: 0, col: 9}, end: boardMove{row: 2, col: 9}, ship: startCruiser, orientation: vertical},
 			expected: nil,
 		},
 	}
