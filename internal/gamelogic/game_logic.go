@@ -28,16 +28,16 @@ func convertMove(mv string) (boardMove, error) {
 		return boardMove{}, fmt.Errorf("error: could not convert number in move to int: %s", mv)
 	}
 
-	if !(int('a') <= int(letter) && int(letter) <= int('j')) {
+	if !(int(START_COL_HEADER) <= int(letter) && int(letter) <= int(END_COL_HEADER)) {
 		return boardMove{}, fmt.Errorf("error: move did not contain a letter that was between a-j: %s", mv)
 	}
 
-	if !(1 <= numInt && numInt <= 10) {
+	if !(START_ROW_HEADER <= numInt && numInt <= END_ROW_HEADER) {
 		return boardMove{}, fmt.Errorf("error: move did not contain a number that was between 1-10: %s", mv)
 	}
 
-	row := (int(letter) - int('a'))
-	col := numInt - 1
+	row := (int(letter) - int(START_COL_HEADER))
+	col := numInt - START_ROW_HEADER
 
 	return boardMove{row: row, col: col}, nil
 }
