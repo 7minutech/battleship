@@ -17,6 +17,7 @@ func main() {
 	fmt.Println("welcome", userName)
 	player := gamelogic.CreatePlayer(userName)
 	gameState := gamelogic.NewGameState(player)
+	gameState.Show()
 	for {
 		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Print(">>> ")
@@ -36,6 +37,7 @@ func main() {
 				continue
 			}
 			log.Printf("placed ship: %s from %s to %s", words[1], words[2], words[3])
+			gameState.Show()
 		case "show":
 			gameState.Show()
 		case "quit":
