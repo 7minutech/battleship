@@ -103,6 +103,10 @@ func (gs *gameState) getShipPlacement(words []string) (shipPlacement, error) {
 		return shipPlacement{}, err
 	}
 
+	if len(ship.modules) != 0 {
+		return shipPlacement{}, fmt.Errorf("error: %s has already been placed", shipName)
+	}
+
 	startPlaceMove, err := convertMove(startPlace)
 	if err != nil {
 		return shipPlacement{}, err
