@@ -32,7 +32,7 @@ func main() {
 			}
 			err := gameState.PlaceShip(words)
 			if err != nil {
-				log.Printf("error: could place ship: %s from %s to %s because %v", words[1], words[2], words[3], err)
+				log.Println(err)
 				continue
 			}
 			log.Printf("placed ship: %s from %s to %s", words[1], words[2], words[3])
