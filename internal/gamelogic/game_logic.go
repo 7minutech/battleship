@@ -28,8 +28,8 @@ func convertMove(mv string) (boardMove, error) {
 		return boardMove{}, fmt.Errorf("error: could not convert number in move to int: %s", mv)
 	}
 
-	if !(int('a') <= int(letter) && int(letter) <= int('z')) {
-		return boardMove{}, fmt.Errorf("error: move did not contain a letter that was between a-z: %s", mv)
+	if !(int('a') <= int(letter) && int(letter) <= int('j')) {
+		return boardMove{}, fmt.Errorf("error: move did not contain a letter that was between a-j: %s", mv)
 	}
 
 	if !(1 <= numInt && numInt <= 10) {
