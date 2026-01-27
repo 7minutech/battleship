@@ -252,3 +252,8 @@ func Abs(x int) int {
 	}
 	return x
 }
+
+func PrintServerHelp() {
+	fmt.Println("help: prints possible commands")
+	fmt.Println("log: prints server logs")
+}
