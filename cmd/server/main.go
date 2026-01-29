@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 
 	"github.com/7minutech/battleship/internal/gamelogic"
 	"github.com/7minutech/battleship/internal/pubsub"
@@ -44,5 +45,11 @@ func main() {
 		default:
 			fmt.Printf("did not recognize command: %s\n", words[0])
 		}
+
+		// wait for ctrl+c
+		signalChan := make(chan os.Signal, 1)
+		signal.Notify(signalChan, os.Interrupt)
+		<-signalChan
+		fmt.Println("RabbitMQ connection closed.")
 	}
 }
