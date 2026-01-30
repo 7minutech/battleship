@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/7minutech/battleship/internal/routing"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -195,6 +196,10 @@ func (gs *gameState) ShowOpponentBoard() {
 
 }
 
+func (gs *gameState) pause() {
+	fmt.Println("Game is paused.")
+}
+
 func NewGameState(player Player) *gameState {
 	var gs gameState = gameState{player: player, turn: player1}
 	return &gs
@@ -256,4 +261,12 @@ func Abs(x int) int {
 func PrintServerHelp() {
 	fmt.Println("help: prints possible commands")
 	fmt.Println("log: prints server logs")
+}
+
+func PauseHandler(gs *gameState) func(msg routing.PauseMessage) {
+	return func(msg routing.PauseMessage) {
+		defer fmt.Print(">>> ")
+		gs.pause()
+		fmt.Println("Received pause message:", msg.Content)
+	}
 }
