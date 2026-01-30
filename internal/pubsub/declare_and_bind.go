@@ -1,6 +1,8 @@
 package pubsub
 
-import amqp "github.com/rabbitmq/amqp091-go"
+import (
+	amqp "github.com/rabbitmq/amqp091-go"
+)
 
 type SimpleQueueType int
 
@@ -14,7 +16,6 @@ func DeclareAndBind(conn *amqp.Connection, exchangeName, queueName, key string, 
 	if err != nil {
 		return nil, amqp.Queue{}, err
 	}
-	defer ch.Close()
 
 	queue, err := ch.QueueDeclare(
 		queueName,
