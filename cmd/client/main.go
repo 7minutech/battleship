@@ -47,10 +47,13 @@ func main() {
 		fmt.Print(">>> ")
 		scanner.Scan()
 		words := gamelogic.GetWords(scanner.Text())
-		switch words[0] {
-		case "help":
+		if words[0] == "help" {
 			gamelogic.Help()
-		case "place":
+			continue
+		} else if words[0] == "quit" {
+			gamelogic.Quit()
+			break
+		} else if words[0] == "place" {
 			if len(words) != 4 {
 				log.Println("did not provide 3 args with place; usage: place cruiser a1 a5")
 				continue
@@ -62,20 +65,17 @@ func main() {
 			}
 			log.Printf("placed ship: %s from %s to %s", words[1], words[2], words[3])
 			gameState.Show()
-		case "show":
+		} else if words[0] == "show" {
 			gameState.Show()
-		case "look":
+		} else if words[0] == "look" {
 			gameState.ShowOpponentBoard()
-		case "quit":
-			gamelogic.Quit()
-		default:
+		} else {
 			fmt.Printf("did not recognize command: %s\n", words[0])
 		}
-
-		// wait for ctrl+c
-		signalChan := make(chan os.Signal, 1)
-		signal.Notify(signalChan, os.Interrupt)
-		<-signalChan
-		fmt.Println("RabbitMQ connection closed.")
 	}
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	<-signalChan
+	fmt.Println("RabbitMQ connection closed.")
 }
