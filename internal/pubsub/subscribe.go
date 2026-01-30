@@ -2,11 +2,12 @@ package pubsub
 
 import (
 	"encoding/json"
+	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func subscribeJSON[T any](
+func SubscribeJSON[T any](
 	conn *amqp.Connection,
 	exchangeName string,
 	queueName string,
@@ -14,12 +15,8 @@ func subscribeJSON[T any](
 	queueType SimpleQueueType,
 	handler func(T),
 ) error {
-	ch, err := conn.Channel()
-	if err != nil {
-		return err
-	}
-	defer ch.Close()
-	ch, _, err = DeclareAndBind(conn, exchangeName, queueName, key, queueType)
+
+	ch, _, err := DeclareAndBind(conn, exchangeName, queueName, key, queueType)
 	if err != nil {
 		return err
 	}
@@ -27,14 +24,14 @@ func subscribeJSON[T any](
 	deliveryCh, err := ch.Consume(
 		queueName,
 		"",
-		true,
+		false,
 		false,
 		false,
 		false,
 		amqp.Table{},
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: could not create delivery channel for queue %s, %v", queueName, err)
 	}
 
 	receiveMessages := func() {
