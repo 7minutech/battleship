@@ -26,7 +26,6 @@ func main() {
 		fmt.Printf("Failed to open a channel: %v", err)
 		return
 	}
-	defer ch.Close()
 
 	gamelogic.PrintServerHelp()
 
