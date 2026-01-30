@@ -34,7 +34,7 @@ func main() {
 	err = pubsub.SubscribeJSON(
 		conn,
 		routing.EXCHANGE_BATTLESHIP_DIRECT,
-		routing.PAUSE_KEY, routing.PAUSE_KEY,
+		routing.PAUSE_KEY+"."+userName, routing.PAUSE_KEY,
 		pubsub.Durabale,
 		gamelogic.PauseHandler(gameState),
 	)
