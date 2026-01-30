@@ -5,11 +5,23 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 
 	"github.com/7minutech/battleship/internal/gamelogic"
+	"github.com/7minutech/battleship/internal/pubsub"
+	"github.com/7minutech/battleship/internal/routing"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func main() {
+
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+	}
+	fmt.Println("Connected to rabbit mq")
+	defer conn.Close()
+
 	userName, err := gamelogic.Welcome()
 	if err != nil {
 		log.Fatalf("error: could not get username %v", err)
@@ -18,6 +30,18 @@ func main() {
 	player := gamelogic.CreatePlayer(userName)
 	gameState := gamelogic.NewGameState(player)
 	gameState.Show()
+
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_DIRECT,
+		routing.PAUSE_KEY, routing.PAUSE_KEY,
+		pubsub.Durabale,
+		gamelogic.PauseHandler(gameState),
+	)
+	if err != nil {
+		log.Fatalf("Failed to subscribe to pause messages: %v", err)
+	}
+
 	for {
 		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Print(">>> ")
@@ -47,5 +71,11 @@ func main() {
 		default:
 			fmt.Printf("did not recognize command: %s\n", words[0])
 		}
+
+		// wait for ctrl+c
+		signalChan := make(chan os.Signal, 1)
+		signal.Notify(signalChan, os.Interrupt)
+		<-signalChan
+		fmt.Println("RabbitMQ connection closed.")
 	}
 }
