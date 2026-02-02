@@ -27,6 +27,16 @@ func main() {
 		return
 	}
 
+	gameState := gamelogic.NewGameState()
+
+	pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_DIRECT,
+		routing.NEW_PLAYER_KEY+"."+"notifier",
+		routing.NEW_PLAYER_KEY,
+		pubsub.Durabale,
+		gamelogic.NewPlayerHandler(gameState))
+
 	gamelogic.PrintServerHelp()
 
 	for {
