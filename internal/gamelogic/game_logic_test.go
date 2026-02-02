@@ -95,42 +95,48 @@ func TestValidShipRange(t *testing.T) {
 }
 
 func TestShipsOccupyRange(t *testing.T) {
-	gs := NewGameState(Player{})
+	gs := NewGameState()
 
 	var testShip ship = startCruiser
+	var gameBoard board
 	// ship from a1 - a3
-	gs.gameBoard.sqaures[0][0] = &testShip
-	gs.gameBoard.sqaures[0][1] = &testShip
-	gs.gameBoard.sqaures[0][2] = &testShip
+	gameBoard.sqaures[0][0] = &testShip
+	gameBoard.sqaures[0][1] = &testShip
+	gameBoard.sqaures[0][2] = &testShip
+
+	type input struct {
+		shipPlacement shipPlacement
+		board         board
+	}
 
 	cases := []struct {
-		input    shipPlacement
+		input    input
 		expected error
 	}{
-		{input: shipPlacement{
-			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCruiser, orientation: horizantal},
+		{input: input{shipPlacement: shipPlacement{
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCruiser, orientation: horizantal}, board: gameBoard},
 			expected: ErrInvalidOccupiedSqaure,
 		},
-		{input: shipPlacement{
-			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: startBattleship, orientation: vertical},
+		{input: input{shipPlacement: shipPlacement{
+			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: startBattleship, orientation: vertical}, board: gameBoard},
 			expected: nil,
 		},
-		{input: shipPlacement{
-			start: boardMove{row: 0, col: 1}, end: boardMove{row: 2, col: 1}, ship: startCruiser, orientation: vertical},
+		{input: input{shipPlacement: shipPlacement{
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 2, col: 1}, ship: startCruiser, orientation: vertical}, board: gameBoard},
 			expected: ErrInvalidOccupiedSqaure,
 		},
-		{input: shipPlacement{
-			start: boardMove{row: 1, col: 1}, end: boardMove{row: 1, col: 3}, ship: startCarrier, orientation: horizantal},
+		{input: input{shipPlacement: shipPlacement{
+			start: boardMove{row: 1, col: 1}, end: boardMove{row: 1, col: 3}, ship: startCarrier, orientation: horizantal}, board: gameBoard},
 			expected: nil,
 		},
-		{input: shipPlacement{
-			start: boardMove{row: 0, col: 9}, end: boardMove{row: 2, col: 9}, ship: startCruiser, orientation: vertical},
+		{input: input{shipPlacement: shipPlacement{
+			start: boardMove{row: 0, col: 9}, end: boardMove{row: 2, col: 9}, ship: startCruiser, orientation: vertical}, board: gameBoard},
 			expected: nil,
 		},
 	}
 
 	for _, c := range cases {
-		err := gs.shipsOccupyRange(c.input)
+		err := gs.shipsOccupyRange(c.input.shipPlacement, c.input.board)
 		if !(errors.Is(err, c.expected)) {
 			t.Errorf("actual: %v; expected: %v", err, c.expected)
 		}
@@ -139,24 +145,29 @@ func TestShipsOccupyRange(t *testing.T) {
 
 func TestGetShip(t *testing.T) {
 	player := CreatePlayer("tester")
-	gs := NewGameState(player)
+	gs := NewGameState()
+
+	type input struct {
+		shipName string
+		player   Player
+	}
 
 	cases := []struct {
-		input    string
+		input    input
 		expected error
 	}{
-		{input: "cruiser", expected: nil},
-		{input: "battleship", expected: nil},
-		{input: "destroyer", expected: nil},
-		{input: "submarine", expected: nil},
-		{input: "carrier", expected: nil},
-		{input: "frigate", expected: ErrShipNotFound},
+		{input: input{shipName: "cruiser", player: player}, expected: nil},
+		{input: input{shipName: "battleship", player: player}, expected: nil},
+		{input: input{shipName: "destroyer", player: player}, expected: nil},
+		{input: input{shipName: "submarine", player: player}, expected: nil},
+		{input: input{shipName: "carrier", player: player}, expected: nil},
+		{input: input{shipName: "frigate", player: player}, expected: ErrShipNotFound},
 	}
 
 	for _, c := range cases {
-		_, err := gs.getShip(c.input)
+		_, err := gs.getShip(c.input.shipName, c.input.player)
 		if !(errors.Is(err, c.expected)) {
-			t.Errorf("GetShip(%s): actual: %v; expected: %v", c.input, err, c.expected)
+			t.Errorf("GetShip(%s): actual: %v; expected: %v", c.input.shipName, err, c.expected)
 		}
 	}
 }
