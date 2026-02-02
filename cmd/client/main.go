@@ -22,24 +22,19 @@ func main() {
 	fmt.Println("Connected to rabbit mq")
 	defer conn.Close()
 
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Failed to open a channel: %v", err)
+	}
+
 	userName, err := gamelogic.Welcome()
 	if err != nil {
 		log.Fatalf("error: could not get username %v", err)
 	}
 	fmt.Println("welcome", userName)
-	player := gamelogic.CreatePlayer(userName)
-	gameState := gamelogic.NewGameState(player)
-	gameState.Show()
 
-	err = pubsub.SubscribeJSON(
-		conn,
-		routing.EXCHANGE_BATTLESHIP_DIRECT,
-		routing.PAUSE_KEY+"."+userName, routing.PAUSE_KEY,
-		pubsub.Durabale,
-		gamelogic.PauseHandler(gameState),
-	)
-	if err != nil {
-		log.Fatalf("Failed to subscribe to pause messages: %v", err)
+	if err := pubsub.PublishJSON(ch, "battleship_direct", routing.NEW_PLAYER_KEY, gamelogic.NewPlayerMessage{UserName: userName}); err != nil {
+		log.Fatalf("Failed to publish new player message: %v", err)
 	}
 
 	for {
@@ -53,24 +48,9 @@ func main() {
 		} else if words[0] == "quit" {
 			gamelogic.Quit()
 			break
-		} else if words[0] == "place" {
-			if len(words) != 4 {
-				log.Println("did not provide 3 args with place; usage: place cruiser a1 a5")
-				continue
-			}
-			err := gameState.PlaceShip(words)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Printf("placed ship: %s from %s to %s", words[1], words[2], words[3])
-			gameState.Show()
-		} else if words[0] == "show" {
-			gameState.Show()
-		} else if words[0] == "look" {
-			gameState.ShowOpponentBoard()
 		} else {
 			fmt.Printf("did not recognize command: %s\n", words[0])
+			continue
 		}
 	}
 
