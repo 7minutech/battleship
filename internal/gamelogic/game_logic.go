@@ -65,12 +65,12 @@ func createShips() []ship {
 	return ships
 }
 
-func (gs *gameState) PlaceShip(words []string) error {
-	sp, err := gs.getShipPlacement(words)
+func (gs *gameState) PlaceShip(words []string, board board) error {
+	sp, err := gs.getShipPlacement(words, *gs.getPlayerByName(board.owner))
 	if err != nil {
 		return err
 	}
-	if err := gs.validateShipPlacement(sp); err != nil {
+	if err := gs.validateShipPlacement(sp, board); err != nil {
 		return err
 	}
 	for i := range sp.ship.length {
@@ -82,18 +82,18 @@ func (gs *gameState) PlaceShip(words []string) error {
 			row = sp.start.row + i
 		}
 		bm := boardMove{row: row, col: col}
-		gs.gameBoard.sqaures[row][col] = &sp.ship
+		board.sqaures[row][col] = &sp.ship
 		sp.ship.modules[bm] = false
 	}
 
 	return nil
 }
 
-func (gs *gameState) getShipPlacement(words []string) (shipPlacement, error) {
+func (gs *gameState) getShipPlacement(words []string, player Player) (shipPlacement, error) {
 	shipName := words[1]
 	startPlace := words[2]
 	endPlace := words[3]
-	ship, err := gs.getShip(shipName)
+	ship, err := gs.getShip(shipName, player)
 	if err != nil {
 		return shipPlacement{}, err
 	}
@@ -127,17 +127,17 @@ func (gs *gameState) getShipPlacement(words []string) (shipPlacement, error) {
 
 }
 
-func (gs *gameState) validateShipPlacement(sp shipPlacement) error {
+func (gs *gameState) validateShipPlacement(sp shipPlacement, board board) error {
 	var err error
 	err = validShipRange(sp)
-	err = gs.shipsOccupyRange(sp)
+	err = gs.shipsOccupyRange(sp, board)
 	return err
 }
 
 var ErrShipNotFound = errors.New("error: could not find ship with that name")
 
-func (gs *gameState) getShip(shipName string) (ship, error) {
-	for _, ship := range gs.player.ships {
+func (gs *gameState) getShip(shipName string, player Player) (ship, error) {
+	for _, ship := range player.ships {
 		if ship.name == shipName {
 			return ship, nil
 		}
@@ -145,7 +145,7 @@ func (gs *gameState) getShip(shipName string) (ship, error) {
 	return ship{}, ErrShipNotFound
 }
 
-func (gs *gameState) Show() {
+func (gs *gameState) Show(gameBoard board) {
 	defer fmt.Println()
 	var data [][]string
 	header := []string{" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
@@ -155,7 +155,7 @@ func (gs *gameState) Show() {
 		rowLabel := string(rune(rowLabelVal))
 		rowData := []string{rowLabel}
 		for col := range BOARD_SIZE {
-			ship := gs.gameBoard.sqaures[row][col]
+			ship := gameBoard.sqaures[row][col]
 			if ship == nil {
 				rowData = append(rowData, OPTIONAL_SQUARE)
 			} else {
@@ -171,7 +171,7 @@ func (gs *gameState) Show() {
 
 }
 
-func (gs *gameState) ShowOpponentBoard() {
+func (gs *gameState) ShowOpponentBoard(opponentBoard displayBoard) {
 	defer fmt.Println()
 	var data [][]string
 	header := []string{" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
@@ -181,7 +181,7 @@ func (gs *gameState) ShowOpponentBoard() {
 		rowLabel := string(rune(rowLabelVal))
 		rowData := []string{rowLabel}
 		for col := range BOARD_SIZE {
-			square := gs.opponentBoaord.sqaures[row][col]
+			square := opponentBoard.sqaures[row][col]
 			if square == "" {
 				square = OPTIONAL_SQUARE
 			}
@@ -200,9 +200,9 @@ func (gs *gameState) pause() {
 	fmt.Println("Game is paused.")
 }
 
-func NewGameState(player Player) *gameState {
-	var gs gameState = gameState{player: player, turn: player1}
-	return &gs
+func NewGameState() *gameState {
+	gs := &gameState{}
+	return gs
 }
 
 var ErrInvalidOrientation = errors.New("error: not placed left to right or up and down")
@@ -231,10 +231,10 @@ func validShipRange(sp shipPlacement) error {
 
 var ErrInvalidOccupiedSqaure = fmt.Errorf("error: there are ships already between start and end")
 
-func (gs *gameState) shipsOccupyRange(sp shipPlacement) error {
+func (gs *gameState) shipsOccupyRange(sp shipPlacement, board board) error {
 	if sp.orientation == horizantal {
 		for i := 0; i < sp.ship.length; i++ {
-			occupying := gs.gameBoard.sqaures[sp.start.row][sp.start.col+i]
+			occupying := board.sqaures[sp.start.row][sp.start.col+i]
 			if occupying != nil {
 				return ErrInvalidOccupiedSqaure
 			}
@@ -242,7 +242,7 @@ func (gs *gameState) shipsOccupyRange(sp shipPlacement) error {
 		return nil
 	} else {
 		for i := 0; i < sp.ship.length; i++ {
-			occupying := gs.gameBoard.sqaures[sp.start.row+i][sp.start.col]
+			occupying := board.sqaures[sp.start.row+i][sp.start.col]
 			if occupying != nil {
 				return ErrInvalidOccupiedSqaure
 			}
@@ -269,4 +269,31 @@ func PauseHandler(gs *gameState) func(msg routing.PauseMessage) {
 		gs.pause()
 		fmt.Println("Received pause message:", msg.Content)
 	}
+}
+
+func NewPlayerHandler(gs *gameState) func(msg NewPlayerMessage) {
+	return func(msg NewPlayerMessage) {
+		fmt.Printf("New player joined: %s\n", msg.UserName)
+		if gs.player1.userName == "" {
+			gs.player1 = CreatePlayer(msg.UserName)
+			gs.currentPlayer = gs.player1
+			gs.player1Board.owner = gs.player1.userName
+			fmt.Printf("Assigned %s as Player 1\n", msg.UserName)
+		} else if gs.player2.userName == "" {
+			gs.player2 = CreatePlayer(msg.UserName)
+			gs.player2Board.owner = gs.player2.userName
+			fmt.Printf("Assigned %s as Player 2\n", msg.UserName)
+		} else {
+			fmt.Printf("Both player slots are full. Could not assign %s\n", msg.UserName)
+		}
+	}
+}
+
+func (gs *gameState) getPlayerByName(name string) *Player {
+	if gs.player1.userName == name {
+		return &gs.player1
+	} else if gs.player2.userName == name {
+		return &gs.player2
+	}
+	return nil
 }
