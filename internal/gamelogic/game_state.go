@@ -90,17 +90,21 @@ const (
 )
 
 type gameState struct {
-	player         Player
-	turn           PlayerTurn
-	gameBoard      board
-	opponentBoaord displayBoard
+	player1       Player
+	player2       Player
+	currentPlayer Player
+	player1Board  board
+	player2Board  board
+	gameOver      bool
 }
 
 type board struct {
+	owner   string
 	sqaures [BOARD_SIZE][BOARD_SIZE]*ship
 }
 
 type displayBoard struct {
+	owner   string
 	sqaures [BOARD_SIZE][BOARD_SIZE]string
 }
 
@@ -131,4 +135,8 @@ type shipPlacement struct {
 	end         boardMove
 	ship        ship
 	orientation orientation
+}
+
+type NewPlayerMessage struct {
+	UserName string `json:"user_name"`
 }
