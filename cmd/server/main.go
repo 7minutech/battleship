@@ -34,7 +34,7 @@ func main() {
 		routing.EXCHANGE_BATTLESHIP_DIRECT,
 		routing.NEW_PLAYER_KEY+"."+"notifier",
 		routing.NEW_PLAYER_KEY,
-		pubsub.Durabale,
+		pubsub.Transient,
 		gamelogic.NewPlayerHandler(gameState))
 
 	gamelogic.PrintServerHelp()
