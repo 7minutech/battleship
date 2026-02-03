@@ -29,21 +29,31 @@ func main() {
 
 	gameState := gamelogic.NewGameState()
 
-	pubsub.SubscribeJSON(
+	err = pubsub.SubscribeJSON(
 		conn,
 		routing.EXCHANGE_BATTLESHIP_DIRECT,
 		routing.NEW_PLAYER_KEY+"."+"notifier",
 		routing.NEW_PLAYER_KEY,
 		pubsub.Transient,
-		gamelogic.NewPlayerHandler(gameState))
+		gamelogic.NewPlayerHandler(gameState),
+	)
+	if err != nil {
+		fmt.Printf("Failed to subscribe to new player messages: %v", err)
+		return
+	}
 
-	pubsub.SubscribeJSON(
+	err = pubsub.SubscribeJSON(
 		conn,
 		routing.EXCHANGE_BATTLESHIP_DIRECT,
 		routing.GAME_COMMANDS_QUEUE,
 		routing.SHOW_BOARD_KEY,
 		pubsub.Transient,
-		gamelogic.ShowBoardHandler(gameState, ch))
+		gamelogic.ShowBoardHandler(gameState, ch),
+	)
+	if err != nil {
+		fmt.Printf("Failed to subscribe to show board messages: %v", err)
+		return
+	}
 
 	gamelogic.PrintServerHelp()
 
