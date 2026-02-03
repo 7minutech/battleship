@@ -7,8 +7,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/7minutech/battleship/internal/pubsub"
 	"github.com/7minutech/battleship/internal/routing"
 	"github.com/olekukonko/tablewriter"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func GetWords(input string) []string {
@@ -145,8 +147,15 @@ func (gs *gameState) getShip(shipName string, player Player) (ship, error) {
 	return ship{}, ErrShipNotFound
 }
 
-func (gs *gameState) Show(gameBoard board) {
-	defer fmt.Println()
+func Show(boardData [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header(boardData[0])
+	table.Bulk(boardData[1:])
+	table.Render()
+
+}
+
+func (gs *gameState) boardData(board board) [][]string {
 	var data [][]string
 	header := []string{" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 	data = append(data, header)
@@ -155,7 +164,7 @@ func (gs *gameState) Show(gameBoard board) {
 		rowLabel := string(rune(rowLabelVal))
 		rowData := []string{rowLabel}
 		for col := range BOARD_SIZE {
-			ship := gameBoard.sqaures[row][col]
+			ship := board.sqaures[row][col]
 			if ship == nil {
 				rowData = append(rowData, OPTIONAL_SQUARE)
 			} else {
@@ -164,11 +173,7 @@ func (gs *gameState) Show(gameBoard board) {
 		}
 		data = append(data, rowData)
 	}
-	table := tablewriter.NewWriter(os.Stdout)
-	table.Header(data[0])
-	table.Bulk(data[1:])
-	table.Render()
-
+	return data
 }
 
 func (gs *gameState) ShowOpponentBoard(opponentBoard displayBoard) {
@@ -271,21 +276,54 @@ func PauseHandler(gs *gameState) func(msg routing.PauseMessage) {
 	}
 }
 
-func NewPlayerHandler(gs *gameState) func(msg NewPlayerMessage) {
-	return func(msg NewPlayerMessage) {
+func NewPlayerHandler(gs *gameState) func(msg NewPlayerMessage) pubsub.AckType {
+	return func(msg NewPlayerMessage) pubsub.AckType {
 		fmt.Printf("New player joined: %s\n", msg.UserName)
 		if gs.player1.userName == "" {
 			gs.player1 = CreatePlayer(msg.UserName)
 			gs.currentPlayer = gs.player1
 			gs.player1Board.owner = gs.player1.userName
 			fmt.Printf("Assigned %s as Player 1\n", msg.UserName)
+			return pubsub.Ack
 		} else if gs.player2.userName == "" {
 			gs.player2 = CreatePlayer(msg.UserName)
 			gs.player2Board.owner = gs.player2.userName
 			fmt.Printf("Assigned %s as Player 2\n", msg.UserName)
+			return pubsub.Ack
 		} else {
 			fmt.Printf("Both player slots are full. Could not assign %s\n", msg.UserName)
+			return pubsub.NackDiscard
 		}
+	}
+}
+
+func ShowBoardHandler(gs *gameState, ch *amqp.Channel) func(msg routing.ShowBoardMessage) pubsub.AckType {
+	return func(msg routing.ShowBoardMessage) pubsub.AckType {
+		player := gs.getPlayerByName(msg.UserName)
+		if player == nil {
+			fmt.Printf("Could not find player with name: %s\n", msg.UserName)
+			return pubsub.NackDiscard
+		}
+		var boardToShow board
+		if gs.player1.userName == player.userName {
+			boardToShow = gs.player1Board
+		} else if gs.player2.userName == player.userName {
+			boardToShow = gs.player2Board
+		} else {
+			fmt.Printf("Could not find board for player: %s\n", msg.UserName)
+			return pubsub.NackDiscard
+		}
+
+		boardData := gs.boardData(boardToShow)
+
+		err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_DIRECT, routing.BOARD_STATE_KEY, routing.ShowBoardMessage{UserName: msg.UserName, BoardData: boardData})
+		if err != nil {
+			fmt.Printf("Failed to publish board state message: %v\n", err)
+			return pubsub.NackRequeue
+		}
+		fmt.Printf("Showing board for player: %s\n", msg.UserName)
+
+		return pubsub.Ack
 	}
 }
 
@@ -296,4 +334,15 @@ func (gs *gameState) getPlayerByName(name string) *Player {
 		return &gs.player2
 	}
 	return nil
+}
+
+func ClientBoardStateHandler(userName string) func(msg routing.ShowBoardMessage) pubsub.AckType {
+	return func(msg routing.ShowBoardMessage) pubsub.AckType {
+		if msg.UserName != userName {
+			return pubsub.NackDiscard
+		}
+		fmt.Println("Received board state update:")
+		Show(msg.BoardData)
+		return pubsub.Ack
+	}
 }
