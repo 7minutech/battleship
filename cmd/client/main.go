@@ -45,6 +45,9 @@ func main() {
 		pubsub.Transient,
 		gamelogic.ClientBoardStateHandler(userName),
 	)
+	if err != nil {
+		log.Fatalf("Failed to subscribe to board state messages: %v", err)
+	}
 
 	for {
 		scanner := bufio.NewScanner(os.Stdin)
