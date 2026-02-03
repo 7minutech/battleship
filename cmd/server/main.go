@@ -37,6 +37,14 @@ func main() {
 		pubsub.Transient,
 		gamelogic.NewPlayerHandler(gameState))
 
+	pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_DIRECT,
+		routing.GAME_COMMANDS_QUEUE,
+		routing.SHOW_BOARD_KEY,
+		pubsub.Transient,
+		gamelogic.ShowBoardHandler(gameState, ch))
+
 	gamelogic.PrintServerHelp()
 
 	for {
