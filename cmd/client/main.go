@@ -34,8 +34,17 @@ func main() {
 	fmt.Println("welcome", userName)
 
 	if err := pubsub.PublishJSON(ch, "battleship_direct", routing.NEW_PLAYER_KEY, gamelogic.NewPlayerMessage{UserName: userName}); err != nil {
-		log.Fatalf("Failed to publish new player message: %v", err)
+		log.Fatalf("Failed t																																									o publish new player message: %v", err)
 	}
+
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_DIRECT,
+		routing.BOARD_STATE_KEY+"."+userName,
+		routing.BOARD_STATE_KEY,
+		pubsub.Transient,
+		gamelogic.ClientBoardStateHandler(userName),
+	)
 
 	for {
 		scanner := bufio.NewScanner(os.Stdin)
@@ -48,6 +57,8 @@ func main() {
 		} else if words[0] == "quit" {
 			gamelogic.Quit()
 			break
+		} else if words[0] == "show" {
+			pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_DIRECT, routing.SHOW_BOARD_KEY, routing.ShowBoardMessage{UserName: userName})
 		} else {
 			fmt.Printf("did not recognize command: %s\n", words[0])
 			continue
