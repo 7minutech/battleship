@@ -67,12 +67,12 @@ func createShips() []ship {
 	return ships
 }
 
-func (gs *gameState) PlaceShip(words []string, board board) error {
+func (gs *gameState) PlaceShip(words []string, board *board) error {
 	sp, err := gs.getShipPlacement(words, *gs.getPlayerByName(board.owner))
 	if err != nil {
 		return err
 	}
-	if err := gs.validateShipPlacement(sp, board); err != nil {
+	if err := gs.validateShipPlacement(sp, *board); err != nil {
 		return err
 	}
 	for i := range sp.ship.length {
@@ -316,13 +316,78 @@ func ShowBoardHandler(gs *gameState, ch *amqp.Channel) func(msg routing.ShowBoar
 
 		boardData := gs.boardData(boardToShow)
 
-		err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_DIRECT, routing.BOARD_STATE_KEY, routing.ShowBoardMessage{UserName: msg.UserName, BoardData: boardData})
+		err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.BOARD_STATE_KEY+"."+msg.UserName, routing.ShowBoardMessage{UserName: msg.UserName, BoardData: boardData})
 		if err != nil {
 			fmt.Printf("Failed to publish board state message: %v\n", err)
 			return pubsub.NackRequeue
 		}
 		fmt.Printf("Showing board for player: %s\n", msg.UserName)
 
+		return pubsub.Ack
+	}
+}
+
+func PlaceShipHandler(gs *gameState, ch *amqp.Channel) func(msg routing.PlaceShipCommand) pubsub.AckType {
+	return func(msg routing.PlaceShipCommand) pubsub.AckType {
+		player := gs.getPlayerByName(msg.UserName)
+		if player == nil {
+			fmt.Printf("Could not find player with name: %s\n", msg.UserName)
+			err := pubsub.PublishJSON(
+				ch,
+				routing.EXCHANGE_BATTLESHIP_TOPIC,
+				routing.PLACE_STATE_KEY+"."+msg.UserName,
+				routing.PlaceShipMessage{UserName: msg.UserName, Success: false, Message: "Player not found"},
+			)
+			if err != nil {
+				fmt.Printf("Failed to publish place ship message for player %s: %v\n", msg.UserName, err)
+			}
+			return pubsub.NackDiscard
+		}
+		var boardToPlaceOn *board
+		if gs.player1.userName == player.userName {
+			boardToPlaceOn = &gs.player1Board
+		} else if gs.player2.userName == player.userName {
+			boardToPlaceOn = &gs.player2Board
+		} else {
+			fmt.Printf("Could not find board for player: %s\n", msg.UserName)
+			err := pubsub.PublishJSON(
+				ch,
+				routing.EXCHANGE_BATTLESHIP_TOPIC,
+				routing.PLACE_STATE_KEY+"."+msg.UserName,
+				routing.PlaceShipMessage{UserName: msg.UserName, Success: false, Message: "Board not found"},
+			)
+			if err != nil {
+				fmt.Printf("Failed to publish place ship message for player %s: %v\n", msg.UserName, err)
+			}
+			return pubsub.NackDiscard
+		}
+
+		err := gs.PlaceShip(GetWords(fmt.Sprintf("place %s %s %s", msg.ShipType, msg.StartCoord, msg.EndCoord)), boardToPlaceOn)
+		if err != nil {
+			fmt.Printf("Failed to place ship for player %s: %v\n", msg.UserName, err)
+			err := pubsub.PublishJSON(
+				ch,
+				routing.EXCHANGE_BATTLESHIP_TOPIC,
+				routing.PLACE_STATE_KEY+"."+msg.UserName,
+				routing.PlaceShipMessage{UserName: msg.UserName, Success: false, Message: err.Error()},
+			)
+			if err != nil {
+				fmt.Printf("Failed to publish place ship message for player %s: %v\n", msg.UserName, err)
+			}
+			return pubsub.NackDiscard
+		}
+		fmt.Printf("Placed ship for player: %s\n", msg.UserName)
+
+		err = pubsub.PublishJSON(
+			ch,
+			routing.EXCHANGE_BATTLESHIP_TOPIC,
+			routing.PLACE_STATE_KEY+"."+msg.UserName,
+			routing.PlaceShipMessage{UserName: msg.UserName, Success: true, Message: "Ship placed successfully"},
+		)
+		if err != nil {
+			fmt.Printf("Failed to publish place ship message for player %s: %v\n", msg.UserName, err)
+			return pubsub.NackRequeue
+		}
 		return pubsub.Ack
 	}
 }
@@ -338,11 +403,23 @@ func (gs *gameState) getPlayerByName(name string) *Player {
 
 func ClientBoardStateHandler(userName string) func(msg routing.ShowBoardMessage) pubsub.AckType {
 	return func(msg routing.ShowBoardMessage) pubsub.AckType {
+		defer fmt.Print(">>> ")
 		if msg.UserName != userName {
 			return pubsub.NackDiscard
 		}
 		fmt.Println("Received board state update:")
 		Show(msg.BoardData)
+		return pubsub.Ack
+	}
+}
+
+func ClientPlaceShipHandler(userName string) func(msg routing.PlaceShipMessage) pubsub.AckType {
+	return func(msg routing.PlaceShipMessage) pubsub.AckType {
+		defer fmt.Print(">>> ")
+		if msg.UserName != userName {
+			return pubsub.NackDiscard
+		}
+		fmt.Printf("Received place ship message: %s %t %s\n", msg.UserName, msg.Success, msg.Message)
 		return pubsub.Ack
 	}
 }
