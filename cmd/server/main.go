@@ -31,9 +31,9 @@ func main() {
 
 	err = pubsub.SubscribeJSON(
 		conn,
-		routing.EXCHANGE_BATTLESHIP_DIRECT,
+		routing.EXCHANGE_BATTLESHIP_TOPIC,
 		routing.NEW_PLAYER_KEY+"."+"notifier",
-		routing.NEW_PLAYER_KEY,
+		routing.NEW_PLAYER_KEY+".*",
 		pubsub.Transient,
 		gamelogic.NewPlayerHandler(gameState),
 	)
@@ -44,14 +44,27 @@ func main() {
 
 	err = pubsub.SubscribeJSON(
 		conn,
-		routing.EXCHANGE_BATTLESHIP_DIRECT,
-		routing.GAME_COMMANDS_QUEUE,
-		routing.SHOW_BOARD_KEY,
+		routing.EXCHANGE_BATTLESHIP_TOPIC,
+		routing.GAME_COMMANDS_KEY+"."+"show_board",
+		routing.SHOW_BOARD_KEY+".*",
 		pubsub.Transient,
 		gamelogic.ShowBoardHandler(gameState, ch),
 	)
 	if err != nil {
 		fmt.Printf("Failed to subscribe to show board messages: %v", err)
+		return
+	}
+
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_TOPIC,
+		routing.GAME_COMMANDS_KEY+"."+"place_ship",
+		routing.PLACE_BOARD_KEY+".*",
+		pubsub.Transient,
+		gamelogic.PlaceShipHandler(gameState, ch),
+	)
+	if err != nil {
+		fmt.Printf("Failed to subscribe to place ship messages: %v", err)
 		return
 	}
 
