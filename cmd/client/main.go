@@ -33,20 +33,32 @@ func main() {
 	}
 	fmt.Println("welcome", userName)
 
-	if err := pubsub.PublishJSON(ch, "battleship_direct", routing.NEW_PLAYER_KEY, gamelogic.NewPlayerMessage{UserName: userName}); err != nil {
-		log.Fatalf("Failed t																																									o publish new player message: %v", err)
+	if err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.NEW_PLAYER_KEY+"."+userName, gamelogic.NewPlayerMessage{UserName: userName}); err != nil {
+		log.Fatalf("Failed to publish new player message: %v", err)
 	}
 
 	err = pubsub.SubscribeJSON(
 		conn,
-		routing.EXCHANGE_BATTLESHIP_DIRECT,
+		routing.EXCHANGE_BATTLESHIP_TOPIC,
 		routing.BOARD_STATE_KEY+"."+userName,
-		routing.BOARD_STATE_KEY,
+		routing.BOARD_STATE_KEY+".*",
 		pubsub.Transient,
 		gamelogic.ClientBoardStateHandler(userName),
 	)
 	if err != nil {
 		log.Fatalf("Failed to subscribe to board state messages: %v", err)
+	}
+
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_TOPIC,
+		routing.PLACE_STATE_KEY+"."+userName,
+		routing.PLACE_STATE_KEY+".*",
+		pubsub.Transient,
+		gamelogic.ClientPlaceShipHandler(userName),
+	)
+	if err != nil {
+		log.Fatalf("Failed to subscribe to place ship messages: %v", err)
 	}
 
 	for {
@@ -61,7 +73,18 @@ func main() {
 			gamelogic.Quit()
 			break
 		} else if words[0] == "show" {
-			pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_DIRECT, routing.SHOW_BOARD_KEY, routing.ShowBoardMessage{UserName: userName})
+			pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.SHOW_BOARD_KEY+"."+userName, routing.ShowBoardMessage{UserName: userName})
+		} else if words[0] == "place" {
+			if len(words) != 4 {
+				fmt.Println("Usage: place <ship_type> <start_coord> <end_coord>")
+				continue
+			} else {
+				shipType := words[1]
+				startCoord := words[2]
+				endCoord := words[3]
+				placeShip := routing.PlaceShipCommand{UserName: userName, ShipType: shipType, StartCoord: startCoord, EndCoord: endCoord}
+				pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.PLACE_BOARD_KEY+"."+userName, placeShip)
+			}
 		} else {
 			fmt.Printf("did not recognize command: %s\n", words[0])
 			continue
