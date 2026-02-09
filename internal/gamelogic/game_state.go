@@ -1,6 +1,8 @@
 package gamelogic
 
-import "github.com/fatih/color"
+import (
+	"github.com/fatih/color"
+)
 
 const BOARD_SIZE = 10
 
