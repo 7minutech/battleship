@@ -7,9 +7,19 @@ import (
 	"os"
 )
 
-func Help() {
+func ClientHelp() {
+	fmt.Println("help: prints possible commands")
+	fmt.Println("place: place a ship on the board; usage: place <ship type> <x> <y> <orientation>")
+	fmt.Println("show: shows the current state of the board")
+	fmt.Println("ships: cruiser, destroyer, submarine, battleship, carrier")
+	fmt.Println("quit: exits the program")
+	// make this a map of command to description and loop through it instead of hardcoding the print statements
+}
+
+func ServerHelp() {
 	fmt.Println("help: prints possible commands")
 	fmt.Println("quit: exits the program")
+	fmt.Println("pause: sends a message to all clients that the server is paused")
 }
 
 func Quit() {

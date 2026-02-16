@@ -77,7 +77,7 @@ func main() {
 		words := gamelogic.GetWords(scanner.Text())
 
 		if words[0] == "help" {
-			gamelogic.Help()
+			gamelogic.ServerHelp()
 			continue
 		} else if words[0] == "quit" {
 			gamelogic.Quit()
