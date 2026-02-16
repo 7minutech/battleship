@@ -61,6 +61,18 @@ func main() {
 		log.Fatalf("Failed to subscribe to place ship messages: %v", err)
 	}
 
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_TOPIC,
+		routing.AUTO_PLACE_STATE_KEY+"."+userName,
+		routing.AUTO_PLACE_STATE_KEY+".*",
+		pubsub.Transient,
+		gamelogic.ClientAutoPlaceHandler(userName),
+	)
+	if err != nil {
+		log.Fatalf("Failed to subscribe to auto place messages: %v", err)
+	}
+
 	for {
 		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Print(">>> ")
@@ -85,6 +97,8 @@ func main() {
 				placeShip := routing.PlaceShipCommand{UserName: userName, ShipType: shipType, StartCoord: startCoord, EndCoord: endCoord}
 				pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.PLACE_BOARD_KEY+"."+userName, placeShip)
 			}
+		} else if words[0] == "auto" {
+			pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.AUTO_PLACE_KEY+"."+userName, routing.AutoPlaceMessage{UserName: userName})
 		} else {
 			fmt.Printf("did not recognize command: %s\n", words[0])
 			continue
