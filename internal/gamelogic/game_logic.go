@@ -246,10 +246,14 @@ func validShipRange(sp shipPlacement) error {
 }
 
 var ErrInvalidOccupiedSqaure = fmt.Errorf("error: there are ships already between start and end")
+var ErrOffBoard = fmt.Errorf("error: ship placement is off the board")
 
 func (gs *gameState) shipsOccupyRange(sp shipPlacement, board board) error {
 	if sp.orientation == horizontal {
 		for i := 0; i < sp.ship.length; i++ {
+			if sp.start.col+i >= BOARD_SIZE {
+				return ErrOffBoard
+			}
 			occupying := board.sqaures[sp.start.row][sp.start.col+i]
 			if occupying != nil {
 				return ErrInvalidOccupiedSqaure
@@ -258,6 +262,9 @@ func (gs *gameState) shipsOccupyRange(sp shipPlacement, board board) error {
 		return nil
 	} else {
 		for i := 0; i < sp.ship.length; i++ {
+			if sp.start.row+i >= BOARD_SIZE {
+				return ErrOffBoard
+			}
 			occupying := board.sqaures[sp.start.row+i][sp.start.col]
 			if occupying != nil {
 				return ErrInvalidOccupiedSqaure
@@ -425,6 +432,57 @@ func (gs *gameState) AutoPlaceShips(player *Player, board *board) {
 	}
 }
 
+func AutoPlaceHandler(gs *gameState, ch *amqp.Channel) func(msg routing.AutoPlaceMessage) pubsub.AckType {
+	return func(msg routing.AutoPlaceMessage) pubsub.AckType {
+		player := gs.getPlayerByName(msg.UserName)
+		if player == nil {
+			fmt.Printf("Could not find player with name: %s\n", msg.UserName)
+			err := pubsub.PublishJSON(
+				ch,
+				routing.EXCHANGE_BATTLESHIP_TOPIC,
+				routing.AUTO_PLACE_STATE_KEY+"."+msg.UserName,
+				routing.AutoPlaceMessage{UserName: msg.UserName, Success: false, Message: "Player not found"},
+			)
+			if err != nil {
+				fmt.Printf("Failed to publish auto place ship message for player %s: %v\n", msg.UserName, err)
+			}
+		}
+		var boardToPlaceOn *board
+		if gs.player1.userName == player.userName {
+			boardToPlaceOn = &gs.player1Board
+		} else if gs.player2.userName == player.userName {
+			boardToPlaceOn = &gs.player2Board
+		} else {
+			fmt.Printf("Could not find board for player: %s\n", msg.UserName)
+			err := pubsub.PublishJSON(
+				ch,
+				routing.EXCHANGE_BATTLESHIP_TOPIC,
+				routing.AUTO_PLACE_STATE_KEY+"."+msg.UserName,
+				routing.AutoPlaceMessage{UserName: msg.UserName, Success: false, Message: "Board not found"},
+			)
+			if err != nil {
+				fmt.Printf("Failed to publish auto place ship message for player %s: %v\n", msg.UserName, err)
+			}
+			return pubsub.NackDiscard
+		}
+
+		gs.AutoPlaceShips(player, boardToPlaceOn)
+
+		err := pubsub.PublishJSON(
+			ch,
+			routing.EXCHANGE_BATTLESHIP_TOPIC,
+			routing.AUTO_PLACE_STATE_KEY+"."+msg.UserName,
+			routing.AutoPlaceMessage{UserName: msg.UserName, Success: true, Message: "Ships auto placed successfully"},
+		)
+		if err != nil {
+			fmt.Printf("Failed to publish auto place ship message for player %s: %v\n", msg.UserName, err)
+			return pubsub.NackRequeue
+		}
+
+		return pubsub.Ack
+	}
+}
+
 func ClientBoardStateHandler(userName string) func(msg routing.ShowBoardMessage) pubsub.AckType {
 	return func(msg routing.ShowBoardMessage) pubsub.AckType {
 		defer fmt.Print(">>> ")
@@ -444,6 +502,17 @@ func ClientPlaceShipHandler(userName string) func(msg routing.PlaceShipMessage) 
 			return pubsub.NackDiscard
 		}
 		fmt.Printf("Received place ship message: %s %t %s\n", msg.UserName, msg.Success, msg.Message)
+		return pubsub.Ack
+	}
+}
+
+func ClientAutoPlaceHandler(userName string) func(msg routing.AutoPlaceMessage) pubsub.AckType {
+	return func(msg routing.AutoPlaceMessage) pubsub.AckType {
+		defer fmt.Print(">>> ")
+		if msg.UserName != userName {
+			return pubsub.NackDiscard
+		}
+		fmt.Printf("Received auto place ship message: %s %t %s\n", msg.UserName, msg.Success, msg.Message)
 		return pubsub.Ack
 	}
 }
