@@ -431,3 +431,13 @@ func PickRandomSquare() boardMove {
 
 	return boardMove{row: row, col: col}
 }
+
+func PickRandomShipPlacement(ship ship) shipPlacement {
+	orientation := orientation(rand.Intn(2))
+	return shipPlacement{
+		ship:        ship,
+		orientation: orientation,
+		start:       PickRandomSquare(),
+		end:         PickRandomSquare(),
+	}
+}
