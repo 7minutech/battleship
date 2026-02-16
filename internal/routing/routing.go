@@ -10,6 +10,8 @@ const GAME_SERVER_KEY = "game.server"
 const BOARD_STATE_KEY = "board.state"
 const PLACE_STATE_KEY = "board.place.state"
 const PLACE_BOARD_KEY = "board.place"
+const AUTO_PLACE_KEY = "board.auto.place"
+const AUTO_PLACE_STATE_KEY = "board.auto.place.state"
 
 type ShowBoardMessage struct {
 	UserName  string
@@ -21,6 +23,12 @@ type PlaceShipCommand struct {
 	ShipType   string
 	StartCoord string
 	EndCoord   string
+}
+
+type AutoPlaceMessage struct {
+	UserName string
+	Success  bool
+	Message  string
 }
 
 type PlaceShipMessage struct {
