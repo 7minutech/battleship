@@ -87,7 +87,7 @@ const (
 type orientation int
 
 const (
-	horizantal orientation = 0
+	horizontal orientation = 0
 	vertical   orientation = 1
 )
 

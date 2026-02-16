@@ -89,7 +89,7 @@ func (gs *gameState) PlaceShipByShipPlacement(sp shipPlacement, board *board) er
 	for i := range sp.ship.length {
 		row := sp.start.row
 		col := sp.start.col
-		if sp.orientation == horizantal {
+		if sp.orientation == horizontal {
 			col = sp.start.col + i
 		} else {
 			row = sp.start.row + i
@@ -127,7 +127,7 @@ func (gs *gameState) getShipPlacement(words []string, player Player) (shipPlacem
 
 	var shipOrientation orientation
 	if startPlaceMove.row == endPlaceMove.row {
-		shipOrientation = horizantal
+		shipOrientation = horizontal
 	} else if startPlaceMove.col == endPlaceMove.col {
 		shipOrientation = vertical
 	} else {
@@ -226,7 +226,7 @@ var ErrInvalidShipSpace = errors.New("error: ship does not fit between start and
 
 func validShipRange(sp shipPlacement) error {
 
-	if sp.orientation == horizantal {
+	if sp.orientation == horizontal {
 		if sp.start.col > sp.end.col {
 			return ErrInvalidOrientation
 		}
@@ -248,7 +248,7 @@ func validShipRange(sp shipPlacement) error {
 var ErrInvalidOccupiedSqaure = fmt.Errorf("error: there are ships already between start and end")
 
 func (gs *gameState) shipsOccupyRange(sp shipPlacement, board board) error {
-	if sp.orientation == horizantal {
+	if sp.orientation == horizontal {
 		for i := 0; i < sp.ship.length; i++ {
 			occupying := board.sqaures[sp.start.row][sp.start.col+i]
 			if occupying != nil {
