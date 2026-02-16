@@ -171,3 +171,16 @@ func TestGetShip(t *testing.T) {
 		}
 	}
 }
+
+func TestPickRandomSquare(t *testing.T) {
+	// this test is not deterministic but it should be very unlikely to fail unless there is a bug in the function
+	for i := 0; i < 100; i++ {
+		move := PickRandomSquare()
+		if move.row < 0 || move.row >= BOARD_SIZE {
+			t.Errorf("PickRandomSquare(): row = %d; expected row between 0 and %d", move.row, BOARD_SIZE-1)
+		}
+		if move.col < 0 || move.col >= BOARD_SIZE {
+			t.Errorf("PickRandomSquare(): col = %d; expected col between 0 and %d", move.col, BOARD_SIZE-1)
+		}
+	}
+}

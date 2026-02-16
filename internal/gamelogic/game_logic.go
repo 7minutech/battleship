@@ -3,6 +3,7 @@ package gamelogic
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -422,4 +423,11 @@ func ClientPlaceShipHandler(userName string) func(msg routing.PlaceShipMessage) 
 		fmt.Printf("Received place ship message: %s %t %s\n", msg.UserName, msg.Success, msg.Message)
 		return pubsub.Ack
 	}
+}
+
+func PickRandomSquare() boardMove {
+	row := rand.Intn(BOARD_SIZE)
+	col := rand.Intn(BOARD_SIZE)
+
+	return boardMove{row: row, col: col}
 }
