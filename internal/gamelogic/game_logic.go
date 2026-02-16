@@ -73,6 +73,16 @@ func (gs *gameState) PlaceShip(words []string, board *board) error {
 	if err != nil {
 		return err
 	}
+
+	err = gs.PlaceShipByShipPlacement(sp, board)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gs *gameState) PlaceShipByShipPlacement(sp shipPlacement, board *board) error {
 	if err := gs.validateShipPlacement(sp, *board); err != nil {
 		return err
 	}
