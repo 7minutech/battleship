@@ -412,6 +412,19 @@ func (gs *gameState) getPlayerByName(name string) *Player {
 	return nil
 }
 
+func (gs *gameState) autoPlaceShips(player *Player, board *board) {
+	for _, ship := range player.ships {
+		placed := false
+		for !placed {
+			sp := PickRandomShipPlacement(ship)
+			err := gs.PlaceShipByShipPlacement(sp, board)
+			if err == nil {
+				placed = true
+			}
+		}
+	}
+}
+
 func ClientBoardStateHandler(userName string) func(msg routing.ShowBoardMessage) pubsub.AckType {
 	return func(msg routing.ShowBoardMessage) pubsub.AckType {
 		defer fmt.Print(">>> ")
