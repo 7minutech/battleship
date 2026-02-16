@@ -412,7 +412,7 @@ func (gs *gameState) getPlayerByName(name string) *Player {
 	return nil
 }
 
-func (gs *gameState) autoPlaceShips(player *Player, board *board) {
+func (gs *gameState) AutoPlaceShips(player *Player, board *board) {
 	for _, ship := range player.ships {
 		placed := false
 		for !placed {
