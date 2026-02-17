@@ -73,6 +73,18 @@ func main() {
 		log.Fatalf("Failed to subscribe to auto place messages: %v", err)
 	}
 
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_DIRECT,
+		routing.GAME_RESET_KEY+"."+userName,
+		routing.GAME_RESET_KEY,
+		pubsub.Transient,
+		gamelogic.ClientGameResetHandler,
+	)
+	if err != nil {
+		log.Fatalf("Failed to subscribe to game reset messages: %v", err)
+	}
+
 	for {
 		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Print(">>> ")
