@@ -1,9 +1,5 @@
 package gamelogic
 
-import (
-	"github.com/fatih/color"
-)
-
 const BOARD_SIZE = 10
 
 const STARTING_SHIP_COUNT = 5
@@ -21,61 +17,6 @@ const START_ROW_HEADER = 1
 const END_ROW_HEADER = 10
 const START_COL_HEADER = 'a'
 const END_COL_HEADER = 'j'
-
-var startCruiser = ship{
-	name:    "cruiser",
-	length:  CRUISER_LENGTH,
-	start:   boardMove{},
-	end:     boardMove{},
-	modules: map[boardMove]bool{},
-	hp:      CRUISER_LENGTH,
-	alive:   true,
-	icon:    color.GreenString(SHIP_CHAR),
-}
-
-var startBattleship = ship{
-	name:    "battleship",
-	length:  BATTLESHIP_LENGTH,
-	start:   boardMove{},
-	end:     boardMove{},
-	modules: map[boardMove]bool{},
-	hp:      BATTLESHIP_LENGTH,
-	alive:   true,
-	icon:    color.BlueString(SHIP_CHAR),
-}
-
-var startCarrier = ship{
-	name:    "carrier",
-	length:  CARRIER_LENGTH,
-	start:   boardMove{},
-	end:     boardMove{},
-	modules: map[boardMove]bool{},
-	hp:      CARRIER_LENGTH,
-	alive:   true,
-	icon:    color.RedString(SHIP_CHAR),
-}
-
-var startSubmarine = ship{
-	name:    "submarine",
-	length:  SUBMARINE_LENGTH,
-	start:   boardMove{},
-	end:     boardMove{},
-	modules: map[boardMove]bool{},
-	hp:      SUBMARINE_LENGTH,
-	alive:   true,
-	icon:    color.HiYellowString(SHIP_CHAR),
-}
-
-var startDestroyer = ship{
-	name:    "destroyer",
-	length:  DESTROYER_LENGTH,
-	start:   boardMove{},
-	end:     boardMove{},
-	modules: map[boardMove]bool{},
-	hp:      DESTROYER_LENGTH,
-	alive:   true,
-	icon:    color.HiMagentaString(SHIP_CHAR),
-}
 
 type PlayerTurn int
 
