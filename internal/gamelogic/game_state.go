@@ -63,7 +63,7 @@ var startSubmarine = ship{
 	modules: map[boardMove]bool{},
 	hp:      SUBMARINE_LENGTH,
 	alive:   true,
-	icon:    color.CyanString(SHIP_CHAR),
+	icon:    color.HiYellowString(SHIP_CHAR),
 }
 
 var startDestroyer = ship{
