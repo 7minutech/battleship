@@ -10,6 +10,7 @@ import (
 
 	"github.com/7minutech/battleship/internal/pubsub"
 	"github.com/7minutech/battleship/internal/routing"
+	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -56,13 +57,78 @@ func CreatePlayer(name string) Player {
 	return player
 }
 
+func createCarrier() ship {
+	return ship{
+		name:    "carrier",
+		length:  CARRIER_LENGTH,
+		start:   boardMove{},
+		end:     boardMove{},
+		modules: map[boardMove]bool{},
+		hp:      CARRIER_LENGTH,
+		alive:   true,
+		icon:    color.RedString(SHIP_CHAR),
+	}
+}
+
+func createBattleship() ship {
+	return ship{
+		name:    "battleship",
+		length:  BATTLESHIP_LENGTH,
+		start:   boardMove{},
+		end:     boardMove{},
+		modules: map[boardMove]bool{},
+		hp:      BATTLESHIP_LENGTH,
+		alive:   true,
+		icon:    color.BlueString(SHIP_CHAR),
+	}
+}
+
+func createCruiser() ship {
+	return ship{
+		name:    "cruiser",
+		length:  CRUISER_LENGTH,
+		start:   boardMove{},
+		end:     boardMove{},
+		modules: map[boardMove]bool{},
+		hp:      CRUISER_LENGTH,
+		alive:   true,
+		icon:    color.GreenString(SHIP_CHAR),
+	}
+}
+
+func createSubmarine() ship {
+	return ship{
+		name:    "submarine",
+		length:  SUBMARINE_LENGTH,
+		start:   boardMove{},
+		end:     boardMove{},
+		modules: map[boardMove]bool{},
+		hp:      SUBMARINE_LENGTH,
+		alive:   true,
+		icon:    color.HiYellowString(SHIP_CHAR),
+	}
+}
+
+func createDestroyer() ship {
+	return ship{
+		name:    "destroyer",
+		length:  DESTROYER_LENGTH,
+		start:   boardMove{},
+		end:     boardMove{},
+		modules: map[boardMove]bool{},
+		hp:      DESTROYER_LENGTH,
+		alive:   true,
+		icon:    color.HiMagentaString(SHIP_CHAR),
+	}
+}
+
 func createShips() []ship {
 	ships := []ship{
-		startCarrier,
-		startBattleship,
-		startCruiser,
-		startDestroyer,
-		startSubmarine,
+		createCarrier(),
+		createBattleship(),
+		createCruiser(),
+		createSubmarine(),
+		createDestroyer(),
 	}
 
 	return ships
@@ -86,6 +152,20 @@ func (gs *gameState) PlaceShipByShipPlacement(sp shipPlacement, board *board) er
 	if err := gs.validateShipPlacement(sp, *board); err != nil {
 		return err
 	}
+
+	var acutalShip *ship
+	player := gs.getPlayerByName(board.owner)
+	for i := range player.ships {
+		if player.ships[i].name == sp.ship.name {
+			acutalShip = &player.ships[i]
+			break
+		}
+	}
+
+	if acutalShip == nil {
+		return fmt.Errorf("error: could not find ship with name %s for player %s", sp.ship.name, player.userName)
+	}
+
 	for i := range sp.ship.length {
 		row := sp.start.row
 		col := sp.start.col
@@ -95,8 +175,8 @@ func (gs *gameState) PlaceShipByShipPlacement(sp shipPlacement, board *board) er
 			row = sp.start.row + i
 		}
 		bm := boardMove{row: row, col: col}
-		board.sqaures[row][col] = &sp.ship
-		sp.ship.modules[bm] = false
+		board.sqaures[row][col] = acutalShip
+		acutalShip.modules[bm] = false
 	}
 
 	return nil
