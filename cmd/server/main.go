@@ -96,8 +96,19 @@ func main() {
 			gamelogic.Quit()
 			break
 		} else if words[0] == "pause" {
-			pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_DIRECT, routing.PAUSE_KEY, routing.PauseMessage{Content: "Server is paused"})
+			err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_DIRECT, routing.PAUSE_KEY, routing.PauseMessage{Content: "Server is paused"})
+			if err != nil {
+				fmt.Printf("Failed to publish pause message: %v", err)
+			}
 			continue
+		} else if words[0] == "reset" {
+			gameState.ResetGame()
+			err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_DIRECT, routing.GAME_RESET_KEY, routing.GameResetMessage{Content: "Game has been reset"})
+			if err != nil {
+				fmt.Printf("Failed to publish game reset message: %v", err)
+			}
+			continue
+
 		} else {
 			fmt.Printf("did not recognize command: %s\n", words[0])
 			continue

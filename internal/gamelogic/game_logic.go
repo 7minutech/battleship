@@ -411,6 +411,16 @@ func PlaceShipHandler(gs *gameState, ch *amqp.Channel) func(msg routing.PlaceShi
 	}
 }
 
+func (gs *gameState) ResetGame() {
+	gs.player1 = Player{}
+	gs.player2 = Player{}
+	gs.currentPlayer = Player{}
+	gs.player1Board = board{}
+	gs.player2Board = board{}
+	gs.gameOver = false
+	fmt.Println("Game has been reset.")
+}
+
 func (gs *gameState) getPlayerByName(name string) *Player {
 	if gs.player1.userName == name {
 		return &gs.player1
@@ -516,6 +526,13 @@ func ClientAutoPlaceHandler(userName string) func(msg routing.AutoPlaceMessage) 
 		fmt.Printf("Received auto place ship message: %s %t %s\n", msg.UserName, msg.Success, msg.Message)
 		return pubsub.Ack
 	}
+}
+
+func ClientGameResetHandler(msg routing.GameResetMessage) pubsub.AckType {
+	defer fmt.Print(">>> ")
+	fmt.Println("Received game reset message:", msg.Content)
+	Quit()
+	return pubsub.Ack
 }
 
 func PickRandomSquare() boardMove {
