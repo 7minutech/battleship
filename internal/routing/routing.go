@@ -11,6 +11,7 @@ const BOARD_STATE_KEY = "board.state"
 const PLACE_STATE_KEY = "board.place.state"
 const PLACE_BOARD_KEY = "board.place"
 const AUTO_PLACE_KEY = "board.auto.place"
+const GAME_RESET_KEY = "game.reset"
 const AUTO_PLACE_STATE_KEY = "board.auto.place.state"
 
 type ShowBoardMessage struct {
@@ -38,5 +39,9 @@ type PlaceShipMessage struct {
 }
 
 type PauseMessage struct {
+	Content string
+}
+
+type GameResetMessage struct {
 	Content string
 }
