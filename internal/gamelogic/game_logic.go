@@ -297,6 +297,7 @@ func PauseHandler(gs *gameState) func(msg routing.PauseMessage) {
 
 func NewPlayerHandler(gs *gameState) func(msg NewPlayerMessage) pubsub.AckType {
 	return func(msg NewPlayerMessage) pubsub.AckType {
+		defer fmt.Print(">>> ")
 		fmt.Printf("New player joined: %s\n", msg.UserName)
 		if gs.player1.userName == "" {
 			gs.player1 = CreatePlayer(msg.UserName)
@@ -318,6 +319,7 @@ func NewPlayerHandler(gs *gameState) func(msg NewPlayerMessage) pubsub.AckType {
 
 func ShowBoardHandler(gs *gameState, ch *amqp.Channel) func(msg routing.ShowBoardMessage) pubsub.AckType {
 	return func(msg routing.ShowBoardMessage) pubsub.AckType {
+		defer fmt.Print(">>> ")
 		player := gs.getPlayerByName(msg.UserName)
 		if player == nil {
 			fmt.Printf("Could not find player with name: %s\n", msg.UserName)
@@ -348,6 +350,7 @@ func ShowBoardHandler(gs *gameState, ch *amqp.Channel) func(msg routing.ShowBoar
 
 func PlaceShipHandler(gs *gameState, ch *amqp.Channel) func(msg routing.PlaceShipCommand) pubsub.AckType {
 	return func(msg routing.PlaceShipCommand) pubsub.AckType {
+		defer fmt.Print(">>> ")
 		player := gs.getPlayerByName(msg.UserName)
 		if player == nil {
 			fmt.Printf("Could not find player with name: %s\n", msg.UserName)
@@ -445,6 +448,7 @@ func (gs *gameState) AutoPlaceShips(player *Player, board *board) {
 
 func AutoPlaceHandler(gs *gameState, ch *amqp.Channel) func(msg routing.AutoPlaceMessage) pubsub.AckType {
 	return func(msg routing.AutoPlaceMessage) pubsub.AckType {
+		defer fmt.Print(">>> ")
 		player := gs.getPlayerByName(msg.UserName)
 		if player == nil {
 			fmt.Printf("Could not find player with name: %s\n", msg.UserName)
