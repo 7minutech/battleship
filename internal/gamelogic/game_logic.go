@@ -589,7 +589,7 @@ func (gs *gameState) getPlayerByName(name string) *Player {
 
 func (gs *gameState) AutoPlaceShips(player *Player, board *board) {
 	for _, ship := range player.ships {
-		placed := ship.modules != nil && len(ship.modules) != 0
+		placed := len(ship.modules) != 0
 		for !placed {
 			sp := PickRandomShipPlacement(ship)
 			err := gs.PlaceShipByShipPlacement(sp, board)
