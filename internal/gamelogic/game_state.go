@@ -13,6 +13,7 @@ const SHIP_CHAR = "●"
 const OPTIONAL_SQUARE = "○"
 const HIT_CHAR = "✖"
 const MISS_CHAR = "~"
+const UNKNOWN_CHAR = "?"
 const START_ROW_HEADER = 1
 const END_ROW_HEADER = 10
 const START_COL_HEADER = 'a'
