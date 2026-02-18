@@ -284,6 +284,23 @@ func (gs *gameState) boardData(board board) [][]string {
 	return data
 }
 
+func (gs *gameState) boardPeekData(board opponentBoard) [][]string {
+	var data [][]string
+	header := []string{" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
+	data = append(data, header)
+	for row := range BOARD_SIZE {
+		rowLabelVal := A_VAL + row
+		rowLabel := string(rune(rowLabelVal))
+		rowData := []string{rowLabel}
+		for col := range BOARD_SIZE {
+			obs := board.squares[row][col]
+			rowData = append(rowData, obs.icon)
+		}
+		data = append(data, rowData)
+	}
+	return data
+}
+
 func (gs *gameState) ShowOpponentBoard(opponentBoard displayBoard) {
 	defer fmt.Println()
 	var data [][]string
@@ -432,6 +449,37 @@ func ShowBoardHandler(gs *gameState, ch *amqp.Channel) func(msg routing.ShowBoar
 		}
 
 		boardData := gs.boardData(boardToShow)
+
+		err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.BOARD_STATE_KEY+"."+msg.UserName, routing.ShowBoardMessage{UserName: msg.UserName, BoardData: boardData})
+		if err != nil {
+			fmt.Printf("Failed to publish board state message: %v\n", err)
+			return pubsub.NackRequeue
+		}
+		fmt.Printf("Showing board for player: %s\n", msg.UserName)
+
+		return pubsub.Ack
+	}
+}
+
+func PeekHandler(gs *gameState, ch *amqp.Channel) func(msg routing.ShowBoardMessage) pubsub.AckType {
+	return func(msg routing.ShowBoardMessage) pubsub.AckType {
+		defer fmt.Print(">>> ")
+		player := gs.getPlayerByName(msg.UserName)
+		if player == nil {
+			fmt.Printf("Could not find player with name: %s\n", msg.UserName)
+			return pubsub.NackDiscard
+		}
+		var boardToShow opponentBoard
+		if gs.player1.userName == player.userName {
+			boardToShow = gs.player2OpponentBoard
+		} else if gs.player2.userName == player.userName {
+			boardToShow = gs.player1OpponentBoard
+		} else {
+			fmt.Printf("Could not find board for player: %s\n", msg.UserName)
+			return pubsub.NackDiscard
+		}
+
+		boardData := gs.boardPeekData(boardToShow)
 
 		err := pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.BOARD_STATE_KEY+"."+msg.UserName, routing.ShowBoardMessage{UserName: msg.UserName, BoardData: boardData})
 		if err != nil {
