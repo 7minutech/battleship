@@ -134,6 +134,22 @@ func createShips() []ship {
 	return ships
 }
 
+func createHitState() opponentBoardState {
+	return opponentBoardState{state: hit, icon: HIT_CHAR}
+}
+
+func createMissState() opponentBoardState {
+	return opponentBoardState{state: miss, icon: MISS_CHAR}
+}
+
+func createUnknown() opponentBoardState {
+	return opponentBoardState{state: unknown, icon: HIT_CHAR}
+}
+
+func createSunkState() opponentBoardState {
+	return opponentBoardState{state: sunk, icon: MISS_CHAR}
+}
+
 func (gs *gameState) PlaceShip(words []string, board *board) error {
 	sp, err := gs.getShipPlacement(words, *gs.getPlayerByName(board.owner))
 	if err != nil {
