@@ -111,6 +111,8 @@ func main() {
 			}
 		} else if words[0] == "auto" {
 			pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.AUTO_PLACE_KEY+"."+userName, routing.AutoPlaceMessage{UserName: userName})
+		} else if words[0] == "peek" {
+			pubsub.PublishJSON(ch, routing.EXCHANGE_BATTLESHIP_TOPIC, routing.OPPONENT_BOARD_STATE_KEY+"."+userName, routing.ClientMessage{UserName: userName})
 		} else {
 			fmt.Printf("did not recognize command: %s\n", words[0])
 			continue
