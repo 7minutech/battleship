@@ -139,11 +139,11 @@ func createHitState() opponentBoardState {
 }
 
 func createMissState() opponentBoardState {
-	return opponentBoardState{state: miss, icon: MISS_CHAR}
+	return opponentBoardState{state: miss}
 }
 
-func createUnknown() opponentBoardState {
-	return opponentBoardState{state: unknown, icon: HIT_CHAR}
+func createUnknownState() opponentBoardState {
+	return opponentBoardState{state: unknown, icon: UNKNOWN_CHAR}
 }
 
 func createSunkState() opponentBoardState {
@@ -330,8 +330,18 @@ func (gs *gameState) pause() {
 	fmt.Println("Game is paused.")
 }
 
+func (gs *gameState) fillOpponentBoards() {
+	for i := 0; i < BOARD_SIZE; i++ {
+		for j := 0; j < BOARD_SIZE; j++ {
+			gs.player1OpponentBoard.squares[i][j] = createUnknownState()
+			gs.player2OpponentBoard.squares[i][j] = createUnknownState()
+		}
+	}
+}
+
 func NewGameState() *gameState {
 	gs := &gameState{}
+	gs.fillOpponentBoards()
 	return gs
 }
 
