@@ -32,17 +32,17 @@ const (
 	vertical   orientation = 1
 )
 
-type hitState int // unknown, hit, miss, or sunk
+type shotState int // unknown, hit, miss, or sunk
 
 const (
-	unknown hitState = 0
-	hit     hitState = 1
-	miss    hitState = 2
-	sunk    hitState = 3
+	unknown shotState = 0
+	hit     shotState = 1
+	miss    shotState = 2
+	sunk    shotState = 3
 )
 
 type opponentBoardState struct {
-	state hitState
+	state shotState
 	icon  string
 }
 
