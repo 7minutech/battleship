@@ -65,23 +65,23 @@ func TestValidShipRange(t *testing.T) {
 		expected error
 	}{
 		{input: shipPlacement{
-			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCruiser, orientation: horizantal},
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: createCruiser(), orientation: horizontal},
 			expected: nil,
 		},
 		{input: shipPlacement{
-			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: startBattleship, orientation: vertical},
+			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: createBattleship(), orientation: vertical},
 			expected: nil,
 		},
 		{input: shipPlacement{
-			start: boardMove{row: 0, col: 3}, end: boardMove{row: 0, col: 1}, ship: startCruiser, orientation: horizantal},
+			start: boardMove{row: 0, col: 3}, end: boardMove{row: 0, col: 1}, ship: createCruiser(), orientation: horizontal},
 			expected: ErrInvalidOrientation,
 		},
 		{input: shipPlacement{
-			start: boardMove{row: 6, col: 4}, end: boardMove{row: 3, col: 4}, ship: startCruiser, orientation: vertical},
+			start: boardMove{row: 6, col: 4}, end: boardMove{row: 3, col: 4}, ship: createCruiser(), orientation: vertical},
 			expected: ErrInvalidOrientation,
 		},
 		{input: shipPlacement{
-			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCarrier, orientation: horizantal},
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 4}, ship: createCruiser(), orientation: horizontal},
 			expected: ErrInvalidShipSpace,
 		},
 	}
@@ -97,7 +97,7 @@ func TestValidShipRange(t *testing.T) {
 func TestShipsOccupyRange(t *testing.T) {
 	gs := NewGameState()
 
-	var testShip ship = startCruiser
+	var testShip ship = createCruiser()
 	var gameBoard board
 	// ship from a1 - a3
 	gameBoard.sqaures[0][0] = &testShip
@@ -114,23 +114,23 @@ func TestShipsOccupyRange(t *testing.T) {
 		expected error
 	}{
 		{input: input{shipPlacement: shipPlacement{
-			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: startCruiser, orientation: horizantal}, board: gameBoard},
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 0, col: 3}, ship: createCruiser(), orientation: horizontal}, board: gameBoard},
 			expected: ErrInvalidOccupiedSqaure,
 		},
 		{input: input{shipPlacement: shipPlacement{
-			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: startBattleship, orientation: vertical}, board: gameBoard},
+			start: boardMove{row: 3, col: 4}, end: boardMove{row: 6, col: 4}, ship: createBattleship(), orientation: vertical}, board: gameBoard},
 			expected: nil,
 		},
 		{input: input{shipPlacement: shipPlacement{
-			start: boardMove{row: 0, col: 1}, end: boardMove{row: 2, col: 1}, ship: startCruiser, orientation: vertical}, board: gameBoard},
+			start: boardMove{row: 0, col: 1}, end: boardMove{row: 2, col: 1}, ship: createCruiser(), orientation: vertical}, board: gameBoard},
 			expected: ErrInvalidOccupiedSqaure,
 		},
 		{input: input{shipPlacement: shipPlacement{
-			start: boardMove{row: 1, col: 1}, end: boardMove{row: 1, col: 3}, ship: startCarrier, orientation: horizantal}, board: gameBoard},
+			start: boardMove{row: 1, col: 1}, end: boardMove{row: 1, col: 3}, ship: createCarrier(), orientation: horizontal}, board: gameBoard},
 			expected: nil,
 		},
 		{input: input{shipPlacement: shipPlacement{
-			start: boardMove{row: 0, col: 9}, end: boardMove{row: 2, col: 9}, ship: startCruiser, orientation: vertical}, board: gameBoard},
+			start: boardMove{row: 0, col: 9}, end: boardMove{row: 2, col: 9}, ship: createCruiser(), orientation: vertical}, board: gameBoard},
 			expected: nil,
 		},
 	}
