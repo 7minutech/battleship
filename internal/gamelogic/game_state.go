@@ -32,18 +32,39 @@ const (
 	vertical   orientation = 1
 )
 
+type hitState int // unknown, hit, miss, or sunk
+
+const (
+	unknown hitState = 0
+	hit     hitState = 1
+	miss    hitState = 2
+	sunk    hitState = 3
+)
+
+type opponentBoardState struct {
+	state hitState
+	icon  string
+}
+
 type gameState struct {
-	player1       Player
-	player2       Player
-	currentPlayer Player
-	player1Board  board
-	player2Board  board
-	gameOver      bool
+	player1              Player
+	player2              Player
+	currentPlayer        Player
+	player1Board         board
+	player2Board         board
+	player1OpponentBoard opponentBoard
+	player2OpponentBoard opponentBoard
+	gameOver             bool
 }
 
 type board struct {
 	owner   string
 	sqaures [BOARD_SIZE][BOARD_SIZE]*ship
+}
+
+type opponentBoard struct {
+	owner   string
+	squares [BOARD_SIZE][BOARD_SIZE]opponentBoardState
 }
 
 type displayBoard struct {
