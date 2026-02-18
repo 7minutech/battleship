@@ -13,6 +13,7 @@ const PLACE_BOARD_KEY = "board.place"
 const AUTO_PLACE_KEY = "board.auto.place"
 const GAME_RESET_KEY = "game.reset"
 const AUTO_PLACE_STATE_KEY = "board.auto.place.state"
+const OPPONENT_BOARD_STATE_KEY = "board.opponent.state"
 
 type ShowBoardMessage struct {
 	UserName  string
@@ -30,6 +31,16 @@ type AutoPlaceMessage struct {
 	UserName string
 	Success  bool
 	Message  string
+}
+
+type ServerMessage struct {
+	UserName string
+	Success  bool
+	Message  string
+}
+
+type ClientMessage struct {
+	UserName string
 }
 
 type PlaceShipMessage struct {
