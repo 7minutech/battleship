@@ -81,6 +81,19 @@ func main() {
 		return
 	}
 
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.EXCHANGE_BATTLESHIP_TOPIC,
+		routing.GAME_COMMANDS_KEY+"."+"peek",
+		routing.OPPONENT_BOARD_STATE_KEY+".*",
+		pubsub.Transient,
+		gamelogic.PeekHandler(gameState, ch),
+	)
+	if err != nil {
+		fmt.Printf("Failed to subscribe to auto place messages: %v", err)
+		return
+	}
+
 	gamelogic.PrintServerHelp()
 
 	for {
